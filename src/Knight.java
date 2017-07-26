@@ -2,12 +2,12 @@ import java.awt.Point;
 import java.util.List;
 
 public class Knight extends Piece {	
-    public Knight (Point location, Piece.Color color) {
-    	super(location, color, Piece.Type.KNIGHT);
+    public Knight (Point location, Piece.Color color, Game game) {
+    	super(location, color, Piece.Type.KNIGHT, game);
     }
     
-    public Knight (int x, int y, Piece.Color color) {
-    	super(x, y, color, Piece.Type.KNIGHT);
+    public Knight (int x, int y, Piece.Color color, Game game) {
+    	super(x, y, color, Piece.Type.KNIGHT, game);
     }
 
     public List<Point> getValidMoves() {
@@ -17,7 +17,7 @@ public class Knight extends Piece {
     // usability
     @Override
     public String toString () {
-    	if (this.color == Piece.Color.BLACK) {
+    	if (this.getColor() == Piece.Color.BLACK) {
     		return "N";
     	} else {
     		return "n";

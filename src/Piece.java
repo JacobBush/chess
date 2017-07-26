@@ -19,26 +19,37 @@ public abstract class Piece {
 	
 	// Private Fields
 	private Point location;
-	public final Color color;
-	public final Type type;
+	private final Color color;
+	private final Type type;
+	private final Game game;
 	
 	// Constructors
-	public Piece (int x, int y, Color color, Type type) {
+	public Piece (int x, int y, Color color, Type type, Game game) {
 		this.location = new Point(x,y);
 		this.color = color;
-		this.type = type;		
+		this.type = type;
+		this.game = game;
 	}
-	public Piece (Point location, Color color, Type type) {
+	public Piece (Point location, Color color, Type type, Game game) {
 		this.location = new Point(location); // copy constructor
 		this.color = color;
 		this.type = type;
+		this.game = game;
 	}
 	
 	// getters
     public Point getLocation () {
     	return new Point(location); // copy constructor
     }
-    
+    public Color getColor () {
+    	return color;
+    }
+    public Type getType () {
+    	return type;
+    }
+    public Game getGame () {
+    	return game;
+    }
     // setters
     public void setLocation(Point destination) {
     	// Note - Will only set location if move is valid

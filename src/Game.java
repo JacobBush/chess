@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 // Implements the model
 public class Game {
 	// Constants
@@ -5,15 +7,17 @@ public class Game {
 	
 	// Fields
 	private Piece[][] board;
+	private ArrayList<Observer> observers;
 	
 	// Constructor
     public Game () {
+    	this.observers = new ArrayList<Observer>();
     	this.initializeBoard();
     }
     
     // Public API
     public void play () {
-    	
+    	notifyObservers("Game Started");
     }
     
     // private Methods    
@@ -54,27 +58,46 @@ public class Game {
     	Piece p = null;
     	switch (type) {
     	case PAWN:
-    		p = new Pawn(x,y,color);
+    		p = new Pawn(x,y,color, this);
     		break;
     	case ROOK:
-    		p = new Rook(x,y,color);
+    		p = new Rook(x,y,color, this);
     		break;
     	case KNIGHT:
-    		p = new Knight(x,y,color);
+    		p = new Knight(x,y,color, this);
     		break;
     	case BISHOP:
-    		p = new Bishop(x,y,color);
+    		p = new Bishop(x,y,color, this);
     		break;
     	case QUEEN:
-    		p = new Queen(x,y,color);
+    		p = new Queen(x,y,color, this);
     		break;
     	case KING:
-    		p = new King(x,y,color);
+    		p = new King(x,y,color, this);
     		break;
     	default:
     		break;
     	}
     	board[x][y] = p;
+    }
+    
+    // Observers
+    public void addObserver(Observer o) {
+    	this.observers.add(o);
+    }
+    
+    public void removeObserver(Observer o) {
+    	this.observers.remove(o);
+    }
+    
+    private void notifyObservers() {
+    	notifyObservers("");
+    }
+    
+    private void notifyObservers(String message) {
+    	for (Observer o : observers) {
+    		o.update(this, message);
+    	}
     }
     
     // Useability

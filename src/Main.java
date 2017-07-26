@@ -12,6 +12,8 @@ public class Main {
     
     private static void runProgram () {
     	Game game = new Game();
-    	System.out.println(game);
+    	Observer o = new TextView(game);
+    	game.addObserver(o);
+    	game.play();
     }
 }

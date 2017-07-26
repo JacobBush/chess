@@ -2,12 +2,12 @@ import java.awt.Point;
 import java.util.List;
 
 public class Rook extends Piece {	
-    public Rook (Point location, Piece.Color color) {
-    	super(location, color, Piece.Type.ROOK);
+    public Rook (Point location, Piece.Color color, Game game) {
+    	super(location, color, Piece.Type.ROOK, game);
     }
     
-    public Rook (int x, int y, Piece.Color color) {
-    	super(x, y, color, Piece.Type.ROOK);
+    public Rook (int x, int y, Piece.Color color, Game game) {
+    	super(x, y, color, Piece.Type.ROOK, game);
     }
 
     public List<Point> getValidMoves() {
@@ -16,7 +16,7 @@ public class Rook extends Piece {
     // usability
     @Override
     public String toString () {
-    	if (this.color == Piece.Color.BLACK) {
+    	if (this.getColor() == Piece.Color.BLACK) {
     		return "R";
     	} else {
     		return "r";
