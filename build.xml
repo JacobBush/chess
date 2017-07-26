@@ -1,6 +1,6 @@
 <project name="chess" default="run" basedir=".">
   <description>
-    Chess application implented using Java.
+    Chess application implemented using Java.
   </description>
   <!-- set global properties for this build -->
   <property name="run_class" value="Main"/>

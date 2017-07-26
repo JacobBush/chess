@@ -6,21 +6,32 @@ public abstract class Piece {
 	public enum Color {
 		BLACK,
 		WHITE;
-	}	
+	}
+	
+	public enum Type {
+		PAWN,
+		ROOK,
+		KNIGHT,
+		BISHOP,
+		QUEEN,
+		KING;
+	}
 	
 	// Private Fields
 	private Point location;
-	private Color color;
-
+	public final Color color;
+	public final Type type;
 	
 	// Constructors
-	public Piece (int x, int y, Color color) {
+	public Piece (int x, int y, Color color, Type type) {
 		this.location = new Point(x,y);
 		this.color = color;
+		this.type = type;		
 	}
-	public Piece (Point location, Color color) {
+	public Piece (Point location, Color color, Type type) {
 		this.location = new Point(location); // copy constructor
 		this.color = color;
+		this.type = type;
 	}
 	
 	// getters

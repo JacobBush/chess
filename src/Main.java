@@ -11,6 +11,7 @@ public class Main {
     }
     
     private static void runProgram () {
-    	System.out.println("Hello World!");
+    	Game game = new Game();
+    	System.out.println(game);
     }
 }
