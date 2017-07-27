@@ -5,7 +5,7 @@ public class ViewController extends JFrame implements Observer {
 	
 	// screen dimension
 	public static final int HEADER_HEIGHT = 50;
-	public static final Dimension WIN_START_SIZE = new Dimension (600 + HEADER_HEIGHT,600);
+	public static final int FOOTER_HEIGHT = HEADER_HEIGHT;
 	
 	public enum ViewSelector {
 		MAIN,
@@ -20,7 +20,7 @@ public class ViewController extends JFrame implements Observer {
 		this.game = game;
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    this.setSize(WIN_START_SIZE);
+	    this.setSize(new Dimension(750,600));
 	    this.setVisible(true);
 	    
 	    selectView (ViewSelector.MAIN);

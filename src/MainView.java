@@ -15,6 +15,7 @@ public class MainView extends JPanel {
 		
 		this.add(new MainViewHeader(), BorderLayout.NORTH);
 		this.add(new MainViewBody(), BorderLayout.CENTER);
+		this.add(new MainViewFooter(), BorderLayout.SOUTH);
 		
 	}
 
@@ -27,6 +28,16 @@ public class MainView extends JPanel {
 			super();
 			this.setPreferredSize(new Dimension(0,vc.HEADER_HEIGHT));
 			this.setBackground(Color.YELLOW);
+		}
+		public void paintComponent (Graphics g) {
+			super.paintComponent(g);
+		}
+	}
+	private class MainViewFooter extends JPanel {
+		public MainViewFooter() {
+			super();
+			this.setPreferredSize(new Dimension(0,vc.FOOTER_HEIGHT));
+			this.setBackground(Color.GREEN);
 		}
 		public void paintComponent (Graphics g) {
 			super.paintComponent(g);
@@ -54,6 +65,4 @@ public class MainView extends JPanel {
 			super.paintComponent(g);
 		}
 	}
-	
-	
 }

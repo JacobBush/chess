@@ -4,7 +4,7 @@ import java.util.ArrayList;
 // Implements the model
 public class Game {
 	// Constants
-	private static final int BOARD_SIZE = 8;
+	public static final int BOARD_SIZE = 8;
 	
 	// Fields
 	private Piece[][] board;
@@ -117,17 +117,24 @@ public class Game {
     	for (int y = BOARD_SIZE-1; y >= 0; y--) {
     		for (int x = 0; x < BOARD_SIZE; x ++) {
     			Piece p = board[x][y];
-    			if ((x+y)%2==0) s+= "_"; else s+= " "; // black or white square
+    			if (isBlackSquare(x,y)) s+= "_"; else s+= " "; // black or white square
     			if (p != null) {
     				s += p.toString();
     			} else {
-    				if ((x+y)%2==0) s+= "_"; else s+= " "; // black or white square
+    				if (isBlackSquare(x,y)) s+= "_"; else s+= " "; // black or white square
     			}
-    			if ((x+y)%2==0) s+= "_"; else s+= " "; // black or white square
+    			if (isBlackSquare(x,y)) s+= "_"; else s+= " "; // black or white square
     		}
     		if (y != 0) s += "\n";
     	}
     	return s;
+    }
+    
+    public static boolean isBlackSquare (int x, int y) {
+    	return (x+y)%2==0;
+    }
+    public static boolean isBlackSquare (Point p) {
+    	return isBlackSquare (p.x, p.y);
     }
     
 }
