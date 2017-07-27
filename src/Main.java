@@ -14,8 +14,7 @@ public class Main {
     	Game game = new Game();
     	Observer o = new TextView(game);
     	game.addObserver(o);
-    	o = new ViewController(game);
-    	game.addObserver(o);
+    	new ViewController(game);
     	game.play();
     }
 }

@@ -1,7 +1,8 @@
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import java.awt.Dimension;
 
-public class ViewController extends JFrame implements Observer {
+public class ViewController extends JFrame {
 	
 	// screen dimension
 	public static final int HEADER_HEIGHT = 50;
@@ -14,6 +15,7 @@ public class ViewController extends JFrame implements Observer {
 	
 	
 	private Game game;
+	private JPanel currentView;
 	
 	public ViewController(Game game) {
 		super("Chess Application - Jacob Bush 2017");
@@ -27,26 +29,30 @@ public class ViewController extends JFrame implements Observer {
 	}
 	
 	public void selectView (ViewSelector view) {
+		if (currentView != null && currentView instanceof Observer) {
+			Observer o = (Observer) currentView;
+			game.removeObserver(o);
+		}
 		this.getContentPane().removeAll();
 		switch (view) {
 		case MAIN:
-			this.add(new MainView(this));
+			currentView = new MainView (this);
+			this.add(currentView);
 			break;
 		case GAME:
-			this.add(new GameView(this, game));
+			currentView = new GameView(this, game);
+			this.add(currentView);
 			break;
 		default:
 			break;
 		}
+		if (currentView != null && currentView instanceof Observer) {
+			Observer o = (Observer) currentView;
+			game.addObserver(o);
+			o.update(game);
+		}
 		this.revalidate();
 		this.repaint();
 	}
-	
-	public void update(Object observable, String message) {
-		
-	}
-    public void update(Object observable) {
-    	this.update(observable, "");
-    }
 	
 }

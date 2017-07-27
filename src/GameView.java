@@ -2,15 +2,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class GameView extends JPanel {
+public class GameView extends JPanel implements Observer {
 	
 	private ViewController vc;
 	private Game game;
+	private GameViewBoard board;
 	
 	public GameView(ViewController vc, Game game) {
 		super();
 		this.game = game;
 		this.vc = vc;
+		this.board = null;
 		
 		this.setLayout(new BorderLayout());
 		
@@ -23,6 +25,11 @@ public class GameView extends JPanel {
 		super.paintComponent(g);
 	}
 	
+	private void handleMovedPieces() {
+		if (board != null) {
+			board.paintPieces();
+		}
+	}	
 	
 	private class GameViewHeader extends JPanel {
 		public GameViewHeader() {
@@ -51,7 +58,8 @@ public class GameView extends JPanel {
 		public GameViewBody() {
 			super();
 			this.setLayout(new BorderLayout());
-			this.add(new GameViewBoard(), BorderLayout.CENTER);
+			board = new GameViewBoard();
+			this.add(board, BorderLayout.CENTER);
 		}
 		@Override
 		protected void paintComponent (Graphics g) {
@@ -67,14 +75,13 @@ public class GameView extends JPanel {
 		
 		public GameViewBoard() {
 			super();
-			int s = Game.BOARD_SIZE;
-			tiles = new GameViewTile[s][s];
+			tiles = new GameViewTile[Game.BOARD_SIZE][Game.BOARD_SIZE];
 			this.setLayout(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
-			for (int x = 0; x < s; x++) {
-				for (int y = s - 1; y >= 0; y--) { // top to bottom
-					c.gridx = x;
-					c.gridy = y;
+			for (int x = 0; x < Game.BOARD_SIZE; x++) {
+				for (int y = 0; y < Game.BOARD_SIZE; y++) {
+					c.gridx = x; 
+					c.gridy = Game.BOARD_SIZE - y; // invert y coordinate
 					tiles[x][y] = new GameViewTile(x,y);
 					this.add(tiles[x][y], c);
 				}
@@ -90,7 +97,57 @@ public class GameView extends JPanel {
 			Piece[][] board = game.getBoard();
 			for (int x = 0; x < Game.BOARD_SIZE; x++) {
 				for (int y = 0; y < Game.BOARD_SIZE; y++) {
-					
+					Piece p = board[x][y];
+					if (p == null) {
+						tiles[x][y].removeSprite ();
+					} else {
+						switch(p.getType()) {
+						case PAWN:
+							if (p.getColor() == Piece.Color.BLACK) {
+								tiles[x][y].addSprite(ImageManager.BLACK_PAWN);
+							} else {
+								tiles[x][y].addSprite(ImageManager.WHITE_PAWN);
+							}
+							break;
+						case ROOK:
+							if (p.getColor() == Piece.Color.BLACK) {
+								tiles[x][y].addSprite(ImageManager.BLACK_ROOK);
+							} else {
+								tiles[x][y].addSprite(ImageManager.WHITE_ROOK);
+							}
+							break;
+						case KNIGHT:
+							if (p.getColor() == Piece.Color.BLACK) {
+								tiles[x][y].addSprite(ImageManager.BLACK_KNIGHT);
+							} else {
+								tiles[x][y].addSprite(ImageManager.WHITE_KNIGHT);
+							}
+							break;
+						case BISHOP:
+							if (p.getColor() == Piece.Color.BLACK) {
+								tiles[x][y].addSprite(ImageManager.BLACK_BISHOP);
+							} else {
+								tiles[x][y].addSprite(ImageManager.WHITE_BISHOP);
+							}
+							break;
+						case QUEEN:
+							if (p.getColor() == Piece.Color.BLACK) {
+								tiles[x][y].addSprite(ImageManager.BLACK_QUEEN);
+							} else {
+								tiles[x][y].addSprite(ImageManager.WHITE_QUEEN);
+							}
+							break;
+						case KING:
+							if (p.getColor() == Piece.Color.BLACK) {
+								tiles[x][y].addSprite(ImageManager.BLACK_KING);
+							} else {
+								tiles[x][y].addSprite(ImageManager.WHITE_KING);
+							}
+							break;
+						default:
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -98,23 +155,35 @@ public class GameView extends JPanel {
 	
 	private class GameViewTile extends JPanel {
 		private Point position;
+		private JLabel pieceImage;		
+		private Dimension size;
 		
 		public GameViewTile(int x, int y) {
 			super();
 			position = new Point(x,y);
-			this.setBackground(Game.isBlackSquare(position) ? Color.BLACK : Color.WHITE);
-			this.setLayout(new BorderLayout());
-			
-			ImageIcon icon = new ImageIcon("img/white_pawn.png");
-			icon = scaleImageToSize(icon, 25, 25);
+			pieceImage = null;
+			size = new Dimension(40,40);
+			this.setBackground(Game.isBlackSquare(position) ? Color.GRAY : Color.WHITE);
+			this.setLayout(new BorderLayout());			
+		}
+		
+		public void addSprite (ImageIcon icon) {
+			icon = scaleImageIconToSize(icon, size);
 			JLabel label = new JLabel();
 		    label.setIcon(icon); 
 		    this.add(label, BorderLayout.CENTER);
 		}
 		
-		private ImageIcon scaleImageToSize (ImageIcon imageIcon, int x, int y) {
+		public void removeSprite () {
+			if (this.pieceImage != null) {
+				this.remove(pieceImage);
+				this.pieceImage = null;
+			}
+		}
+		
+		private ImageIcon scaleImageIconToSize (ImageIcon imageIcon, Dimension size) {
 			Image image = imageIcon.getImage(); // transform it 
-			Image newimg = image.getScaledInstance(x, y, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+			Image newimg = image.getScaledInstance(size.width, size.height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
 			return new ImageIcon(newimg);  // transform it back
 		}
 		
@@ -124,7 +193,16 @@ public class GameView extends JPanel {
 		}
 		@Override
         public Dimension getPreferredSize() {
-            return new Dimension(25, 25);
+            return new Dimension(size);
         }
 	}
+	
+	public void update(Object observable, String message) {
+		this.handleMovedPieces();
+		this.repaint();
+	}
+	
+    public void update(Object observable) {
+    	this.update(observable, "");
+    }
 }

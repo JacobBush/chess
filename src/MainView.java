@@ -9,7 +9,6 @@ public class MainView extends JPanel {
 	public MainView(ViewController vc) {
 		super();
 		this.vc = vc;
-		this.setBackground(Color.BLUE);
 		
 		this.setLayout(new BorderLayout());
 		
@@ -28,7 +27,7 @@ public class MainView extends JPanel {
 		public MainViewHeader() {
 			super();
 			this.setPreferredSize(new Dimension(0,vc.HEADER_HEIGHT));
-			this.setBackground(Color.YELLOW);
+			this.setBackground(Color.BLACK);
 		}
 		@Override
 		protected void paintComponent (Graphics g) {
@@ -39,7 +38,7 @@ public class MainView extends JPanel {
 		public MainViewFooter() {
 			super();
 			this.setPreferredSize(new Dimension(0,vc.FOOTER_HEIGHT));
-			this.setBackground(Color.GREEN);
+			this.setBackground(Color.BLACK);
 		}
 		@Override
 		protected void paintComponent (Graphics g) {
@@ -51,7 +50,6 @@ public class MainView extends JPanel {
 		public MainViewBody() {
 			super();
 			this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-			this.setBackground(Color.RED);
 			
 			this.add(Box.createVerticalGlue()); // spacing
 			JButton b = new JButton ("Play");
