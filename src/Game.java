@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.util.ArrayList;
 
 // Implements the model
@@ -13,11 +14,20 @@ public class Game {
     public Game () {
     	this.observers = new ArrayList<Observer>();
     	this.initializeBoard();
+    	
+    	// Testing
+    	System.out.println(board[0][6].getValidMoves());
     }
     
     // Public API
     public void play () {
     	notifyObservers("Game Started");
+    }
+    
+    // Getters
+    public Piece getPieceAt(Point p) {
+    	if (p.x < 0 || p.x >= BOARD_SIZE || p.y < 0 || p.y >= BOARD_SIZE) return null;
+    	return board[p.x][p.y];
     }
     
     // private Methods    

@@ -12,7 +12,21 @@ public class Pawn extends Piece {
     }
 
     public List<Point> getValidMoves() {
-    	return null;
+    	List<Point> validMoves = new ArrayList<Point>();
+    	int direction = this.getColor() == Piece.Color.BLACK ? -1 : 1;
+    	int homeRow = direction == 1 ? 1 : 6;
+    	Point p = this.getLocation();
+    	Game g = this.getGame();
+    	
+    	Point pp = new Point(p.x, p.y + direction);
+    	if (g.getPieceAt(pp) == null) {
+    		validMoves.add(pp);
+    		pp = new Point(p.x, p.y + 2*direction);
+    		if (p.y == homeRow && g.getPieceAt(pp) == null) {
+    			validMoves.add(pp);
+    		}
+    	}
+    	return validMoves;
     }
     
     // usability
