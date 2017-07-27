@@ -30,6 +30,11 @@ public class Game {
     	return board[p.x][p.y];
     }
     
+    public Piece[][] getBoard () {
+    	// will return shallow copy of board
+    	return board.clone();
+    }
+    
     // private Methods    
     private void initializeBoard() {
     	this.clearBoard ();
