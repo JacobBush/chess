@@ -11,10 +11,6 @@ public class Main {
     }
     
     private static void runProgram () {
-    	Game game = new Game();
-    	Observer o = new TextView(game);
-    	game.addObserver(o);
-    	new ViewController(game);
-    	game.play();
+    	new ViewController(new Game().play());
     }
 }

@@ -50,6 +50,7 @@ public class MainView extends JPanel {
 		public MainViewBody() {
 			super();
 			this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+			this.setBackground(vc.CHOCOLATE_BROWN);
 			
 			this.add(Box.createVerticalGlue()); // spacing
 			JButton b = new JButton ("Play");

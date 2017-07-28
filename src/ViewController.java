@@ -1,12 +1,15 @@
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Dimension;
+import java.awt.Color;
 
 public class ViewController extends JFrame {
 	
 	// screen dimension
 	public static final int HEADER_HEIGHT = 50;
 	public static final int FOOTER_HEIGHT = HEADER_HEIGHT;
+	
+	public static final Color CHOCOLATE_BROWN = new Color(78,46,40);
 	
 	public enum ViewSelector {
 		MAIN,
@@ -22,7 +25,7 @@ public class ViewController extends JFrame {
 		this.game = game;
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    this.setSize(new Dimension(750,600));
+	    this.setMinimumSize(new Dimension(600,600));
 	    this.setVisible(true);
 	    
 	    selectView (ViewSelector.MAIN);

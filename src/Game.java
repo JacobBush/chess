@@ -9,19 +9,47 @@ public class Game {
 	// Fields
 	private Piece[][] board;
 	private ArrayList<Observer> observers;
+	private Piece selectedPiece;
 	
 	// Constructor
     public Game () {
     	this.observers = new ArrayList<Observer>();
     	this.initializeBoard();
-    	
-    	// Testing
-    	System.out.println(board[0][6].getValidMoves());
+    	selectedPiece = null;
     }
     
     // Public API
-    public void play () {
+    public Game play () {
     	notifyObservers("Game Started");
+    	return this; // allows call of new Game().play()
+    }
+    
+    public void grabPiece (Point p) {
+    	if (validPoint(p)) {
+    		selectedPiece = board[p.x][p.y];
+    		notifyObservers();
+    	}
+    }
+    
+    public void releasePiece (Point p) {
+    	selectedPiece = null;
+		notifyObservers();
+    }
+    
+    public void movePiece (Point startingLocation, Point endingLocation) {
+    	Piece p = board[startingLocation.x][startingLocation.y];
+    	if (p != null) {
+    		boolean success = p.move(endingLocation);
+    		if (success) {
+    			board[startingLocation.x][startingLocation.y] = null;
+    			board[endingLocation.x][endingLocation.y] = p;
+    			notifyObservers();
+    		} else {
+    			System.out.println("non-move");
+    		}
+    	} else {
+    		System.out.println("null piece");
+    	}
     }
     
     // Getters
@@ -33,6 +61,10 @@ public class Game {
     public Piece[][] getBoard () {
     	// will return shallow copy of board
     	return board.clone();
+    }
+    
+    public Piece getSelectedPiece () {
+    	return selectedPiece;
     }
     
     // private Methods    
@@ -94,6 +126,10 @@ public class Game {
     		break;
     	}
     	board[x][y] = p;
+    }
+    
+    private boolean validPoint (Point p) {
+    	return !(p == null || p.x < 0 || p.y < 0 || p.x >= BOARD_SIZE || p.y >= BOARD_SIZE);
     }
     
     // Observers

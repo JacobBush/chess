@@ -14,6 +14,7 @@ public class GameView extends JPanel implements Observer {
 		this.vc = vc;
 		this.board = null;
 		
+		
 		this.setLayout(new BorderLayout());
 		
 		this.add(new GameViewHeader(), BorderLayout.NORTH);
@@ -69,12 +70,15 @@ public class GameView extends JPanel implements Observer {
 		
 	}
 	
-	private class GameViewBoard extends JPanel {
+	private class GameViewBoard extends JPanel implements MouseListener, MouseMotionListener {
 		
 		private GameViewTile[][] tiles;
 		
 		public GameViewBoard() {
 			super();
+			
+			this.setBackground(vc.CHOCOLATE_BROWN);
+			
 			tiles = new GameViewTile[Game.BOARD_SIZE][Game.BOARD_SIZE];
 			this.setLayout(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
@@ -86,19 +90,55 @@ public class GameView extends JPanel implements Observer {
 					this.add(tiles[x][y], c);
 				}
 			}
+			
+			addMouseListener(this);
 		}
+		
+		// Mouse events
+		public void mousePressed(MouseEvent e) {
+			game.grabPiece(getBoardPosition(e.getPoint()));
+		}
+		public void mouseReleased(MouseEvent e) {
+			game.releasePiece(getBoardPosition(e.getPoint()));
+		}
+		public void mouseEntered(MouseEvent e) {}
+		public void mouseExited(MouseEvent e) {}
+		public void mouseClicked(MouseEvent e) {
+			if (game.getSelectedPiece() == null) {
+				game.grabPiece(getBoardPosition(e.getPoint()));
+			} else {
+				game.releasePiece(getBoardPosition(e.getPoint()));
+			}
+		}
+		public void mouseMoved(MouseEvent e) {}
+		public void mouseDragged(MouseEvent e) {}
+		
+		
+		private Point getBoardPosition(Point p) {
+			GameViewTile t = tiles[0][Game.BOARD_SIZE - 1];
+			if (p.x < t.getX() || p.y < t.getY()) return null; // stop integer floor issues
+			int x = (p.x - t.getX())/t.getWidth();
+			int y = (p.y - t.getY())/t.getHeight();
+			if (x >= Game.BOARD_SIZE || y >= Game.BOARD_SIZE) return null;
+			return new Point(x , Game.BOARD_SIZE - 1 - y); // change y from point coordinate to game
+		}
+		
 		@Override
 		protected void paintComponent (Graphics g) {
 			super.paintComponent(g);
-			paintPieces();
 		}
 		
 		private void paintPieces () {
 			Piece[][] board = game.getBoard();
+			Piece selectedPiece = game.getSelectedPiece ();
+			Point selectedPieceLocation = null;
+			if (selectedPiece != null) {
+				selectedPieceLocation = selectedPiece.getLocation();
+			}	
 			for (int x = 0; x < Game.BOARD_SIZE; x++) {
 				for (int y = 0; y < Game.BOARD_SIZE; y++) {
 					Piece p = board[x][y];
-					if (p == null) {
+					if (p == null || (selectedPieceLocation != null && selectedPieceLocation.x == x && selectedPieceLocation.y == y)) {
 						tiles[x][y].removeSprite ();
 					} else {
 						switch(p.getType()) {
@@ -150,6 +190,7 @@ public class GameView extends JPanel implements Observer {
 					}
 				}
 			}
+			this.revalidate();
 		}
 	}
 	
@@ -162,16 +203,19 @@ public class GameView extends JPanel implements Observer {
 			super();
 			position = new Point(x,y);
 			pieceImage = null;
-			size = new Dimension(40,40);
+			size = new Dimension(50,50);
 			this.setBackground(Game.isBlackSquare(position) ? Color.GRAY : Color.WHITE);
 			this.setLayout(new BorderLayout());			
 		}
 		
 		public void addSprite (ImageIcon icon) {
-			icon = scaleImageIconToSize(icon, size);
-			JLabel label = new JLabel();
-		    label.setIcon(icon); 
-		    this.add(label, BorderLayout.CENTER);
+			if (this.pieceImage == null) {
+				icon = scaleImageIconToSize(icon, size);
+				pieceImage = new JLabel();
+				pieceImage.setIcon(icon); 
+				this.add(pieceImage, BorderLayout.CENTER);
+			}
+
 		}
 		
 		public void removeSprite () {

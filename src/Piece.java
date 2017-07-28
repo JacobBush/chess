@@ -53,12 +53,12 @@ public abstract class Piece {
     // setters
     public void setLocation(Point destination) {
     	// Note - Will only set location if move is valid
-    	this.movePiece(destination);
+    	this.move(destination);
     }
     
     // Other Public Methods
     
-    public boolean movePiece (Point destination) {
+    public boolean move (Point destination) {
     	if (validMove(destination)) {
     		this.location.setLocation(destination);
     		return true;
