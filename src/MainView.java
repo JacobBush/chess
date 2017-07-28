@@ -2,21 +2,21 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class MainView extends JPanel {
+public class MainView extends JPanel implements Resizable {
 	
 	private ViewController vc;
 	
 	public MainView(ViewController vc) {
 		super();
-		this.vc = vc;
-		
-		this.setLayout(new BorderLayout());
-		
+		this.vc = vc;		
+		this.setLayout(new BorderLayout());		
 		this.add(new MainViewHeader(), BorderLayout.NORTH);
 		this.add(new MainViewBody(), BorderLayout.CENTER);
 		this.add(new MainViewFooter(), BorderLayout.SOUTH);
 		
 	}
+	
+	public void updateSize() {}
 
 	@Override
 	protected void paintComponent (Graphics g) {

@@ -2,25 +2,36 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class GameView extends JPanel implements Observer {
+public class GameView extends JLayeredPane implements Observer, Resizable {
 	
 	private ViewController vc;
 	private Game game;
 	private GameViewBoard board;
+	private GameContent content;
+	private GameView topLevel;
+	
+	private JLabel dragComponent;
 	
 	public GameView(ViewController vc, Game game) {
 		super();
 		this.game = game;
 		this.vc = vc;
 		this.board = null;
+		this.topLevel = this;
+		this.dragComponent = null;
 		
-		
-		this.setLayout(new BorderLayout());
-		
-		this.add(new GameViewHeader(), BorderLayout.NORTH);
-		this.add(new GameViewBody(), BorderLayout.CENTER);
-		this.add(new GameViewFooter(), BorderLayout.SOUTH);
+		content = new GameContent();
+		updateSize();
+		this.add(content, JLayeredPane.DEFAULT_LAYER);
 	}
+	
+	public void updateSize() {
+		content.setBounds(0, 0, vc.getWidth(), vc.getHeight());
+		//resizeSelectableTiles();
+		revalidate();
+		repaint();
+	}
+	
 	@Override
 	protected void paintComponent (Graphics g) {
 		super.paintComponent(g);
@@ -30,7 +41,21 @@ public class GameView extends JPanel implements Observer {
 		if (board != null) {
 			board.paintPieces();
 		}
-	}	
+	}
+	
+	private class GameContent extends JPanel {
+		public GameContent() {
+			super();
+			this.setLayout(new BorderLayout());
+			this.add(new GameViewHeader(), BorderLayout.NORTH);
+			this.add(new GameViewBody(), BorderLayout.CENTER);
+			this.add(new GameViewFooter(), BorderLayout.SOUTH);
+		}
+		@Override
+		protected void paintComponent (Graphics g) {
+			super.paintComponent(g);
+		}
+	}
 	
 	private class GameViewHeader extends JPanel {
 		public GameViewHeader() {
@@ -96,22 +121,30 @@ public class GameView extends JPanel implements Observer {
 		
 		// Mouse events
 		public void mousePressed(MouseEvent e) {
-			game.grabPiece(getBoardPosition(e.getPoint()));
+			this.grabPiece(getBoardPosition(e.getPoint()));
 		}
 		public void mouseReleased(MouseEvent e) {
-			game.releasePiece(getBoardPosition(e.getPoint()));
+			this.releasePiece(getBoardPosition(e.getPoint()));
 		}
 		public void mouseEntered(MouseEvent e) {}
 		public void mouseExited(MouseEvent e) {}
 		public void mouseClicked(MouseEvent e) {
 			if (game.getSelectedPiece() == null) {
-				game.grabPiece(getBoardPosition(e.getPoint()));
+				this.grabPiece(getBoardPosition(e.getPoint()));
 			} else {
-				game.releasePiece(getBoardPosition(e.getPoint()));
+				this.releasePiece(getBoardPosition(e.getPoint()));
 			}
 		}
 		public void mouseMoved(MouseEvent e) {}
 		public void mouseDragged(MouseEvent e) {}
+		
+		private void grabPiece (Point p) {
+			game.grabPiece(p);
+		}
+		
+		private void releasePiece (Point p) {
+			game.releasePiece(p);
+		}
 		
 		
 		private Point getBoardPosition(Point p) {
@@ -141,56 +174,55 @@ public class GameView extends JPanel implements Observer {
 					if (p == null || (selectedPieceLocation != null && selectedPieceLocation.x == x && selectedPieceLocation.y == y)) {
 						tiles[x][y].removeSprite ();
 					} else {
-						switch(p.getType()) {
-						case PAWN:
-							if (p.getColor() == Piece.Color.BLACK) {
-								tiles[x][y].addSprite(ImageManager.BLACK_PAWN);
-							} else {
-								tiles[x][y].addSprite(ImageManager.WHITE_PAWN);
-							}
-							break;
-						case ROOK:
-							if (p.getColor() == Piece.Color.BLACK) {
-								tiles[x][y].addSprite(ImageManager.BLACK_ROOK);
-							} else {
-								tiles[x][y].addSprite(ImageManager.WHITE_ROOK);
-							}
-							break;
-						case KNIGHT:
-							if (p.getColor() == Piece.Color.BLACK) {
-								tiles[x][y].addSprite(ImageManager.BLACK_KNIGHT);
-							} else {
-								tiles[x][y].addSprite(ImageManager.WHITE_KNIGHT);
-							}
-							break;
-						case BISHOP:
-							if (p.getColor() == Piece.Color.BLACK) {
-								tiles[x][y].addSprite(ImageManager.BLACK_BISHOP);
-							} else {
-								tiles[x][y].addSprite(ImageManager.WHITE_BISHOP);
-							}
-							break;
-						case QUEEN:
-							if (p.getColor() == Piece.Color.BLACK) {
-								tiles[x][y].addSprite(ImageManager.BLACK_QUEEN);
-							} else {
-								tiles[x][y].addSprite(ImageManager.WHITE_QUEEN);
-							}
-							break;
-						case KING:
-							if (p.getColor() == Piece.Color.BLACK) {
-								tiles[x][y].addSprite(ImageManager.BLACK_KING);
-							} else {
-								tiles[x][y].addSprite(ImageManager.WHITE_KING);
-							}
-							break;
-						default:
-							break;
-						}
+						ImageIcon sprite = getSpriteForPiece(p);
+						if (sprite != null) tiles[x][y].addSprite(sprite);
 					}
 				}
 			}
 			this.revalidate();
+		}
+	}
+	
+	private ImageIcon getSpriteForPiece(Piece p) {
+		switch(p.getType()) {
+		case PAWN:
+			if (p.getColor() == Piece.Color.BLACK) {
+				return ImageManager.BLACK_PAWN;
+			} else {
+				return ImageManager.WHITE_PAWN;
+			}
+		case ROOK:
+			if (p.getColor() == Piece.Color.BLACK) {
+				return ImageManager.BLACK_ROOK;
+			} else {
+				return ImageManager.WHITE_ROOK;
+			}
+		case KNIGHT:
+			if (p.getColor() == Piece.Color.BLACK) {
+				return ImageManager.BLACK_KNIGHT;
+			} else {
+				return ImageManager.WHITE_KNIGHT;
+			}
+		case BISHOP:
+			if (p.getColor() == Piece.Color.BLACK) {
+				return ImageManager.BLACK_BISHOP;
+			} else {
+				return ImageManager.WHITE_BISHOP;
+			}
+		case QUEEN:
+			if (p.getColor() == Piece.Color.BLACK) {
+				return ImageManager.BLACK_QUEEN;
+			} else {
+				return ImageManager.WHITE_QUEEN;
+			}
+		case KING:
+			if (p.getColor() == Piece.Color.BLACK) {
+				return ImageManager.BLACK_KING;
+			} else {
+				return ImageManager.WHITE_KING;
+			}
+		default:
+			return null;
 		}
 	}
 	
@@ -210,9 +242,7 @@ public class GameView extends JPanel implements Observer {
 		
 		public void addSprite (ImageIcon icon) {
 			if (this.pieceImage == null) {
-				icon = scaleImageIconToSize(icon, size);
-				pieceImage = new JLabel();
-				pieceImage.setIcon(icon); 
+				pieceImage = new PieceSprite(icon, size);
 				this.add(pieceImage, BorderLayout.CENTER);
 			}
 
@@ -225,12 +255,6 @@ public class GameView extends JPanel implements Observer {
 			}
 		}
 		
-		private ImageIcon scaleImageIconToSize (ImageIcon imageIcon, Dimension size) {
-			Image image = imageIcon.getImage(); // transform it 
-			Image newimg = image.getScaledInstance(size.width, size.height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
-			return new ImageIcon(newimg);  // transform it back
-		}
-		
 		@Override
 		protected void paintComponent (Graphics g) {
 			super.paintComponent(g);
@@ -240,6 +264,60 @@ public class GameView extends JPanel implements Observer {
             return new Dimension(size);
         }
 	}
+	
+	private class PieceSprite extends JLabel {
+		public PieceSprite (ImageIcon icon, Dimension size) {
+			super();
+			icon = scaleImageIconToSize (icon, size);
+			this.setIcon(icon);
+		}
+		@Override
+		protected void paintComponent (Graphics g) {
+			super.paintComponent(g);
+		}
+		private ImageIcon scaleImageIconToSize (ImageIcon imageIcon, Dimension size) {
+			Image image = imageIcon.getImage(); // transform it 
+			Image newimg = image.getScaledInstance(size.width, size.height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+			return new ImageIcon(newimg);  // transform it back
+		}
+	}
+	
+	/*private class DragComponent extends JPanel {
+		private JLabel pieceImage;
+		private Dimension size;
+		
+		public DragComponent (Point gameBoardLocation) {
+			super();
+			size = new Dimension(50,50);
+			this.setSize(size);
+			Piece p = game.getPieceAt(gameBoardLocation);
+			this.addSprite(getSpriteForPiece(p));
+		}
+		protected void paintComponent (Graphics g) {
+			super.paintComponent(g);
+		}
+		public void addSprite (ImageIcon icon) {
+			if (this.pieceImage == null) {
+				icon = scaleImageIconToSize(icon, size);
+				pieceImage = new JLabel();
+				pieceImage.setIcon(icon); 
+				this.add(pieceImage, BorderLayout.CENTER);
+			}
+
+		}
+		public void removeSprite () {
+			if (this.pieceImage != null) {
+				this.remove(pieceImage);
+				this.pieceImage = null;
+			}
+		}
+		private ImageIcon scaleImageIconToSize (ImageIcon imageIcon, Dimension size) {
+			Image image = imageIcon.getImage(); // transform it 
+			Image newimg = image.getScaledInstance(size.width, size.height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+			return new ImageIcon(newimg);  // transform it back
+		}
+	}
+	*/
 	
 	public void update(Object observable, String message) {
 		this.handleMovedPieces();

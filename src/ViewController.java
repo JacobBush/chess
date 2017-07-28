@@ -1,13 +1,12 @@
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.Dimension;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class ViewController extends JFrame {
 	
 	// screen dimension
 	public static final int HEADER_HEIGHT = 50;
-	public static final int FOOTER_HEIGHT = HEADER_HEIGHT;
+	public static final int FOOTER_HEIGHT = 0;
 	
 	public static final Color CHOCOLATE_BROWN = new Color(78,46,40);
 	
@@ -18,7 +17,7 @@ public class ViewController extends JFrame {
 	
 	
 	private Game game;
-	private JPanel currentView;
+	private JComponent currentView;
 	
 	public ViewController(Game game) {
 		super("Chess Application - Jacob Bush 2017");
@@ -28,7 +27,18 @@ public class ViewController extends JFrame {
 	    this.setMinimumSize(new Dimension(600,600));
 	    this.setVisible(true);
 	    
+	    addComponentListener(new ComponentAdapter() {  
+            public void componentResized(ComponentEvent evt) {
+            	if (currentView != null && currentView instanceof Resizable) {
+            		Resizable r = (Resizable) currentView;
+            		r.updateSize();
+            	}
+            }
+	    });
+	    
 	    selectView (ViewSelector.MAIN);
+	    
+	    
 	}
 	
 	public void selectView (ViewSelector view) {
@@ -57,5 +67,7 @@ public class ViewController extends JFrame {
 		this.revalidate();
 		this.repaint();
 	}
+	
+	
 	
 }
