@@ -39,20 +39,6 @@ public class Rook extends Piece {
     	return validMoves;
     }
     
-    private boolean checkValidity (Point p) {
-    	if (Game.validPoint (p)) {
-			Piece piece = this.getGame().getPieceAt(p);
-			return isEmpty(piece) || isEnemy(piece);
-    	}
-    	return false;
-    }
-    private boolean checkBreak (Point p) {
-    	if (Game.validPoint (p)) {
-    		Piece piece = this.getGame().getPieceAt(p);
-			return isAlly(piece) || isEnemy(piece);
-    	}
-    	return false;
-    }
     // usability
     @Override
     public String toString () {

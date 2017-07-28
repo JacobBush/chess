@@ -1,5 +1,6 @@
 import java.awt.Point;
 import java.util.List;
+import java.util.ArrayList;
 
 public class Bishop extends Piece {	
     public Bishop (Point location, Piece.Color color, Game game) {
@@ -11,7 +12,31 @@ public class Bishop extends Piece {
     }
 
     public List<Point> getValidMoves() {
-    	return null;
+    	List<Point> validMoves = new ArrayList<Point>();
+    	Point p = this.getLocation();
+    	
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // up-right
+    		Point pp = new Point(p.x + i, p.y + i);
+    		if (checkValidity(pp)) validMoves.add(pp);
+    		if (checkBreak(pp)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // down-right
+    		Point pp = new Point(p.x + i, p.y - i);
+    		if (checkValidity(pp)) validMoves.add(pp);
+    		if (checkBreak(pp)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // up-left
+    		Point pp = new Point(p.x - i, p.y + i);
+    		if (checkValidity(pp)) validMoves.add(pp);
+    		if (checkBreak(pp)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // down-left
+    		Point pp = new Point(p.x - i, p.y - i);
+    		if (checkValidity(pp)) validMoves.add(pp);
+    		if (checkBreak(pp)) break;
+    	}
+    	
+    	return validMoves;
     }
     
     // usability

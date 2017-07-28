@@ -86,6 +86,22 @@ public abstract class Piece {
     	return p == null;
     }
     
+    // for getValidMoves loops
+    protected boolean checkValidity (Point p) {
+    	if (Game.validPoint (p)) {
+			Piece piece = this.getGame().getPieceAt(p);
+			return isEmpty(piece) || isEnemy(piece);
+    	}
+    	return false;
+    }
+    protected boolean checkBreak (Point p) {
+    	if (Game.validPoint (p)) {
+    		Piece piece = this.getGame().getPieceAt(p);
+			return isAlly(piece) || isEnemy(piece);
+    	}
+    	return false;
+    }
+    
     // Abstract Methods
     public abstract List<Point> getValidMoves();
     
