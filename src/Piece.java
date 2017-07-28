@@ -74,6 +74,18 @@ public abstract class Piece {
     }
     // Private Methods
     
+    public boolean isEnemy (Piece p) {
+    	return (p != null && p.getColor() != this.getColor());
+    }
+    
+    public boolean isAlly (Piece p) {
+    	return (p != null && p.getColor() == this.getColor());
+    }
+    
+    public boolean isEmpty (Piece p) {
+    	return p == null;
+    }
+    
     // Abstract Methods
     public abstract List<Point> getValidMoves();
     

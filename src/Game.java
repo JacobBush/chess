@@ -38,23 +38,23 @@ public class Game {
     }
     
     public void movePiece (Point startingLocation, Point endingLocation) {
-    	Piece p = board[startingLocation.x][startingLocation.y];
-    	movePiece(p, endingLocation);
+    	if (validPoint(startingLocation) && validPoint(endingLocation)) {
+    		Piece p = board[startingLocation.x][startingLocation.y];
+    		if (p != null) {
+        		boolean success = p.move(endingLocation);
+        		if (success) {
+        			board[startingLocation.x][startingLocation.y] = null;
+        			board[endingLocation.x][endingLocation.y] = p;
+        			notifyObservers();
+        		}
+        	}
+    	}
     }
     
     public void movePiece (Piece p, Point endingLocation) {
-    	Point startingLocation = p.getLocation();
     	if (p != null) {
-    		boolean success = p.move(endingLocation);
-    		if (success) {
-    			board[startingLocation.x][startingLocation.y] = null;
-    			board[endingLocation.x][endingLocation.y] = p;
-    			notifyObservers();
-    		} else {
-    			//System.out.println("non-move");
-    		}
-    	} else {
-    		//System.out.println("null piece");
+    		Point startingLocation = p.getLocation();
+    		movePiece(startingLocation, endingLocation);
     	}
     }
     
