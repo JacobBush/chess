@@ -32,12 +32,18 @@ public class Game {
     }
     
     public void releasePiece (Point p) {
+    	movePiece(selectedPiece, p);
     	selectedPiece = null;
 		notifyObservers();
     }
     
     public void movePiece (Point startingLocation, Point endingLocation) {
     	Piece p = board[startingLocation.x][startingLocation.y];
+    	movePiece(p, endingLocation);
+    }
+    
+    public void movePiece (Piece p, Point endingLocation) {
+    	Point startingLocation = p.getLocation();
     	if (p != null) {
     		boolean success = p.move(endingLocation);
     		if (success) {
@@ -45,16 +51,16 @@ public class Game {
     			board[endingLocation.x][endingLocation.y] = p;
     			notifyObservers();
     		} else {
-    			System.out.println("non-move");
+    			//System.out.println("non-move");
     		}
     	} else {
-    		System.out.println("null piece");
+    		//System.out.println("null piece");
     	}
     }
     
     // Getters
     public Piece getPieceAt(Point p) {
-    	if (p.x < 0 || p.x >= BOARD_SIZE || p.y < 0 || p.y >= BOARD_SIZE) return null;
+    	if (!validPoint(p)) return null;
     	return board[p.x][p.y];
     }
     
@@ -128,7 +134,7 @@ public class Game {
     	board[x][y] = p;
     }
     
-    private boolean validPoint (Point p) {
+    public static boolean validPoint (Point p) {
     	return !(p == null || p.x < 0 || p.y < 0 || p.x >= BOARD_SIZE || p.y >= BOARD_SIZE);
     }
     

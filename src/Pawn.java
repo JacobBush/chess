@@ -19,13 +19,19 @@ public class Pawn extends Piece {
     	Game g = this.getGame();
     	
     	Point pp = new Point(p.x, p.y + direction);
-    	if (g.getPieceAt(pp) == null) {
-    		validMoves.add(pp);
-    		pp = new Point(p.x, p.y + 2*direction);
-    		if (p.y == homeRow && g.getPieceAt(pp) == null) {
-    			validMoves.add(pp);
-    		}
-    	}
+    	if (g.getPieceAt(pp) == null) validMoves.add(pp);
+    	
+		pp = new Point(p.x, p.y + 2*direction);
+		if (p.y == homeRow && g.getPieceAt(pp) == null) validMoves.add(pp);
+		
+		pp = new Point (p.x - 1, p.y + direction);
+		Piece piece = g.getPieceAt(pp);
+		if (piece != null && piece.getColor() != this.getColor()) validMoves.add(pp);
+    	
+		pp = new Point (p.x + 1, p.y + direction);
+		piece = g.getPieceAt(pp);
+		if (piece != null && piece.getColor() != this.getColor()) validMoves.add(pp);
+		
     	return validMoves;
     }
     

@@ -42,6 +42,15 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 			board.paintPieces();
 		}
 	}
+
+	private void setDragComponentPosition () {
+		if (dragComponent != null) {
+			Point mousePosn = MouseInfo.getPointerInfo().getLocation();
+			Point componentPosn = this.getLocationOnScreen();
+			int size = 50;
+			dragComponent.setBounds(mousePosn.x - componentPosn.x - size/2, mousePosn.y - componentPosn.y - size/2, size, size);
+		}
+	}
 	
 	private class GameContent extends JPanel {
 		public GameContent() {
@@ -117,6 +126,7 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 			}
 			
 			addMouseListener(this);
+			addMouseMotionListener(this);
 		}
 		
 		// Mouse events
@@ -129,23 +139,38 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		public void mouseEntered(MouseEvent e) {}
 		public void mouseExited(MouseEvent e) {}
 		public void mouseClicked(MouseEvent e) {
-			if (game.getSelectedPiece() == null) {
-				this.grabPiece(getBoardPosition(e.getPoint()));
-			} else {
-				this.releasePiece(getBoardPosition(e.getPoint()));
-			}
+			//if (game.getSelectedPiece() == null) {
+			//	this.grabPiece(getBoardPosition(e.getPoint()));
+			//} else {
+			//	this.releasePiece(getBoardPosition(e.getPoint()));
+			//}
 		}
 		public void mouseMoved(MouseEvent e) {}
-		public void mouseDragged(MouseEvent e) {}
+		public void mouseDragged(MouseEvent e) {
+			dragMouse (e.getPoint());
+		}
 		
 		private void grabPiece (Point p) {
 			game.grabPiece(p);
+			Piece selectedPiece = game.getSelectedPiece();
+			ImageIcon selectedSprite = getSpriteForPiece(selectedPiece);
+			dragComponent = new PieceSprite(selectedSprite, new Dimension(50,50));
+			topLevel.add(dragComponent, JLayeredPane.DRAG_LAYER);
+			setDragComponentPosition();
+			topLevel.revalidate();
 		}
 		
 		private void releasePiece (Point p) {
 			game.releasePiece(p);
+			topLevel.remove(dragComponent);
+			dragComponent = null;
+			topLevel.revalidate();
 		}
 		
+		private void dragMouse (Point p) {
+			setDragComponentPosition ();
+			revalidate();
+		}
 		
 		private Point getBoardPosition(Point p) {
 			GameViewTile t = tiles[0][Game.BOARD_SIZE - 1];
@@ -184,6 +209,8 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 	}
 	
 	private ImageIcon getSpriteForPiece(Piece p) {
+		if (p == null) return null;
+		
 		switch(p.getType()) {
 		case PAWN:
 			if (p.getColor() == Piece.Color.BLACK) {
@@ -268,7 +295,7 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 	private class PieceSprite extends JLabel {
 		public PieceSprite (ImageIcon icon, Dimension size) {
 			super();
-			icon = scaleImageIconToSize (icon, size);
+			icon = icon == null ? null : scaleImageIconToSize (icon, size);
 			this.setIcon(icon);
 		}
 		@Override
@@ -281,43 +308,6 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 			return new ImageIcon(newimg);  // transform it back
 		}
 	}
-	
-	/*private class DragComponent extends JPanel {
-		private JLabel pieceImage;
-		private Dimension size;
-		
-		public DragComponent (Point gameBoardLocation) {
-			super();
-			size = new Dimension(50,50);
-			this.setSize(size);
-			Piece p = game.getPieceAt(gameBoardLocation);
-			this.addSprite(getSpriteForPiece(p));
-		}
-		protected void paintComponent (Graphics g) {
-			super.paintComponent(g);
-		}
-		public void addSprite (ImageIcon icon) {
-			if (this.pieceImage == null) {
-				icon = scaleImageIconToSize(icon, size);
-				pieceImage = new JLabel();
-				pieceImage.setIcon(icon); 
-				this.add(pieceImage, BorderLayout.CENTER);
-			}
-
-		}
-		public void removeSprite () {
-			if (this.pieceImage != null) {
-				this.remove(pieceImage);
-				this.pieceImage = null;
-			}
-		}
-		private ImageIcon scaleImageIconToSize (ImageIcon imageIcon, Dimension size) {
-			Image image = imageIcon.getImage(); // transform it 
-			Image newimg = image.getScaledInstance(size.width, size.height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
-			return new ImageIcon(newimg);  // transform it back
-		}
-	}
-	*/
 	
 	public void update(Object observable, String message) {
 		this.handleMovedPieces();

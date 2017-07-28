@@ -69,6 +69,7 @@ public abstract class Piece {
     
     public boolean validMove (Point destination) {
     	List<Point> validMoves = this.getValidMoves();
+    	if (validMoves == null) return false;
     	return validMoves.contains(destination);
     }
     // Private Methods
