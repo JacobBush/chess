@@ -11,6 +11,7 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 	private GameView topLevel;
 	
 	private JLabel dragComponent;
+	private JLabel turnCounter;
 	
 	public GameView(ViewController vc, Game game) {
 		super();
@@ -52,6 +53,21 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		}
 	}
 	
+	private void updateTurnCounter () {
+		if (turnCounter == null) return;
+		switch(game.getTurn()) {
+		case WHITE:
+			this.turnCounter.setText("White's Turn");
+			break;
+		case BLACK:
+			this.turnCounter.setText("Black's Turn");
+			break;
+		default:
+			this.turnCounter.setText("");
+			break;
+		}
+	}
+	
 	private class GameContent extends JPanel {
 		public GameContent() {
 			super();
@@ -67,10 +83,19 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 	}
 	
 	private class GameViewHeader extends JPanel {
+		
 		public GameViewHeader() {
 			super();
 			this.setBackground(Color.black);
 			this.setPreferredSize(new Dimension(0,vc.HEADER_HEIGHT));
+			this.setLayout(new GridBagLayout());
+			GridBagConstraints gc = new GridBagConstraints();
+			
+			turnCounter = new JLabel();
+			turnCounter.setForeground(Color.WHITE);
+			turnCounter.setFont(new Font("Sans-Serif", Font.BOLD, 20));
+			
+			this.add(turnCounter, gc);
 		}
 		@Override
 		protected void paintComponent (Graphics g) {
@@ -100,8 +125,6 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		protected void paintComponent (Graphics g) {
 			super.paintComponent(g);
 		}
-		
-		
 	}
 	
 	private class GameViewBoard extends JPanel implements MouseListener, MouseMotionListener {
@@ -311,6 +334,7 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 	
 	public void update(Object observable, String message) {
 		this.handleMovedPieces();
+		this.updateTurnCounter();
 		this.repaint();
 	}
 	

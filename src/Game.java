@@ -10,24 +10,31 @@ public class Game {
 	private Piece[][] board;
 	private ArrayList<Observer> observers;
 	private Piece selectedPiece;
+	private Piece.Color turn;
 	
 	// Constructor
     public Game () {
     	this.observers = new ArrayList<Observer>();
     	this.initializeBoard();
     	selectedPiece = null;
+    	turn = null;
     }
     
     // Public API
-    public Game play () {
+    public void play () {
+    	turn = Piece.Color.WHITE;
     	notifyObservers("Game Started");
-    	return this; // allows call of new Game().play()
     }
     
     public void grabPiece (Point p) {
     	if (validPoint(p)) {
-    		selectedPiece = board[p.x][p.y];
-    		notifyObservers();
+    		Piece piece = board[p.x][p.y];
+    		if (isTurnOf(piece)) {
+        		selectedPiece = piece;
+        		notifyObservers();
+    		} else {
+    			// p is null or its not p's turn
+    		}
     	}
     }
     
@@ -40,13 +47,16 @@ public class Game {
     public void movePiece (Point startingLocation, Point endingLocation) {
     	if (validPoint(startingLocation) && validPoint(endingLocation)) {
     		Piece p = board[startingLocation.x][startingLocation.y];
-    		if (p != null) {
+    		if (isTurnOf(p)) {
         		boolean success = p.move(endingLocation);
         		if (success) {
         			board[startingLocation.x][startingLocation.y] = null;
         			board[endingLocation.x][endingLocation.y] = p;
+        			changeTurn();
         			notifyObservers();
         		}
+        	} else {
+        		// p is null or its not p's turn
         	}
     	}
     }
@@ -71,6 +81,10 @@ public class Game {
     
     public Piece getSelectedPiece () {
     	return selectedPiece;
+    }
+    
+    public Piece.Color getTurn () {
+    	return turn;
     }
     
     // private Methods    
@@ -133,6 +147,21 @@ public class Game {
     	}
     	board[x][y] = p;
     }
+    
+    private void changeTurn() {
+    	if (this.turn == Piece.Color.WHITE) {
+    		this.turn = Piece.Color.BLACK;
+    	} else if (this.turn == Piece.Color.BLACK) {
+    		this.turn = Piece.Color.WHITE;
+    	} else {
+    		// turn is null - game not yet started
+    	}
+    }
+    
+    private boolean isTurnOf(Piece p) {
+    	return (p != null) && (p.getColor() == turn);
+    }
+    
     
     public static boolean validPoint (Point p) {
     	return !(p == null || p.x < 0 || p.y < 0 || p.x >= BOARD_SIZE || p.y >= BOARD_SIZE);
