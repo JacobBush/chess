@@ -216,31 +216,35 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		private boolean pieceGrabbedByClick = false;
 		
 		public void mousePressed(MouseEvent e) {
-			if (pieceGrabbedByClick) {
-				// do nothing
-			} else {
-				mouseDownTile = getBoardPosition(e.getPoint());
-				this.grabPiece(mouseDownTile);
-				setMouseCursor();
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				if (pieceGrabbedByClick) {
+					// do nothing
+				} else {
+					mouseDownTile = getBoardPosition(e.getPoint());
+					this.grabPiece(mouseDownTile);
+					setMouseCursor();
+				}
 			}
 		}
 		public void mouseReleased(MouseEvent e) {
-			if (pieceGrabbedByClick) {
-				// nothing done on mousedown - release piece
-				this.releasePiece(getBoardPosition(e.getPoint()));
-				pieceGrabbedByClick = false;
-				setMouseCursor();
-			} else {
-				if (mouseDownTile != null && mouseDownTile.equals(getBoardPosition(e.getPoint()))) { // if tiles are same - click event
-					if (game.getSelectedPiece () != null) {
-						pieceGrabbedByClick = true;				
-					}
-				} else {
-					this.releasePiece(getBoardPosition(e.getPoint()));		
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				if (pieceGrabbedByClick) {
+					// nothing done on mousedown - release piece
+					this.releasePiece(getBoardPosition(e.getPoint()));
 					pieceGrabbedByClick = false;
 					setMouseCursor();
+				} else {
+					if (mouseDownTile != null && mouseDownTile.equals(getBoardPosition(e.getPoint()))) { // if tiles are same - click event
+						if (game.getSelectedPiece () != null) {
+							pieceGrabbedByClick = true;				
+						}
+					} else {
+						this.releasePiece(getBoardPosition(e.getPoint()));		
+						pieceGrabbedByClick = false;
+						setMouseCursor();
+					}
+					mouseDownTile = null;
 				}
-				mouseDownTile = null;
 			}
 		}
 		public void mouseEntered(MouseEvent e) {}
