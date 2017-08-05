@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.*;
 
 public class GameView extends JLayeredPane implements Observer, Resizable {
 	
@@ -22,13 +23,13 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		this.dragComponent = null;
 		
 		content = new GameContent();
-		updateSize();
 		this.add(content, JLayeredPane.DEFAULT_LAYER);
+		updateSize();
 	}
 	
 	public void updateSize() {
 		content.setBounds(0, 0, vc.getWidth(), vc.getHeight());
-		//resizeSelectableTiles();
+		//resizeTiles();
 		revalidate();
 		repaint();
 	}
@@ -68,34 +69,96 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		}
 	}
 	
+	private void resetGame() {
+		game.reset();
+	}
+	
 	private class GameContent extends JPanel {
+		JPanel header;
+		JPanel body;
+		JPanel footer;
+		
 		public GameContent() {
 			super();
 			this.setLayout(new BorderLayout());
-			this.add(new GameViewHeader(), BorderLayout.NORTH);
-			this.add(new GameViewBody(), BorderLayout.CENTER);
-			this.add(new GameViewFooter(), BorderLayout.SOUTH);
+			
+			this.header = new GameViewHeader();
+			this.body = new GameViewBody();
+			this.footer = new GameViewFooter();
+			
+			this.add(header, BorderLayout.NORTH);
+			this.add(body, BorderLayout.CENTER);
+			this.add(footer, BorderLayout.SOUTH);
 		}
 		@Override
 		protected void paintComponent (Graphics g) {
 			super.paintComponent(g);
 		}
+		/*public void printStats () {
+			System.out.println("Header size: " + header.getSize());
+			System.out.println("Body size: " + body.getSize());
+			System.out.println("Footer size: " + footer.getSize());
+		}*/
 	}
 	
 	private class GameViewHeader extends JPanel {
 		
 		public GameViewHeader() {
 			super();
-			this.setBackground(Color.black);
+			
+			Color backGround = Color.BLACK;
+			
+			this.setBackground(backGround);
 			this.setPreferredSize(new Dimension(0,vc.HEADER_HEIGHT));
-			this.setLayout(new GridBagLayout());
+			
+			this.setLayout(new BorderLayout());
+			
+			JPanel leftPanel = new JPanel();
+			JPanel centerPanel = new JPanel();
+			JPanel rightPanel = new JPanel();
+			
+			leftPanel.setBackground(backGround);
+			centerPanel.setBackground(backGround);
+			rightPanel.setBackground(backGround);
+			
+			this.add(leftPanel, BorderLayout.WEST);
+			this.add(centerPanel, BorderLayout.CENTER);
+			this.add(rightPanel, BorderLayout.EAST);
+			
+			leftPanel.setLayout(new GridBagLayout());
 			GridBagConstraints gc = new GridBagConstraints();
+			gc.insets = new Insets(5,20,5,5);
+			
+			JButton homeButton = new JButton("Home");
+			homeButton.addActionListener(new ActionListener () {
+				public void actionPerformed(ActionEvent e) {
+					vc.selectView(ViewController.ViewSelector.MAIN);
+		        }
+			});
+			
+			leftPanel.add(homeButton, gc);
+			
+			centerPanel.setLayout(new GridBagLayout());
+			gc = new GridBagConstraints();
 			
 			turnCounter = new JLabel();
 			turnCounter.setForeground(Color.WHITE);
 			turnCounter.setFont(new Font("Sans-Serif", Font.BOLD, 20));
 			
-			this.add(turnCounter, gc);
+			centerPanel.add(turnCounter, gc);
+			
+			rightPanel.setLayout(new GridBagLayout());
+			gc = new GridBagConstraints();
+			gc.insets = new Insets(5,5,5,20);
+			
+			JButton resetButton = new JButton("Reset");
+			homeButton.addActionListener(new ActionListener () {
+				public void actionPerformed(ActionEvent e) {
+					resetGame();
+		        }
+			});
+			
+			rightPanel.add(resetButton, gc);
 		}
 		@Override
 		protected void paintComponent (Graphics g) {
@@ -153,22 +216,49 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		}
 		
 		// Mouse events
+		
+		private Point mouseDownTile = null;
+		private boolean pieceGrabbedByClick = false;
+		
 		public void mousePressed(MouseEvent e) {
-			this.grabPiece(getBoardPosition(e.getPoint()));
+			if (pieceGrabbedByClick) {
+				// do nothing
+			} else {
+				mouseDownTile = getBoardPosition(e.getPoint());
+				this.grabPiece(mouseDownTile);
+				setMouseCursor();
+			}
 		}
 		public void mouseReleased(MouseEvent e) {
-			this.releasePiece(getBoardPosition(e.getPoint()));
+			if (pieceGrabbedByClick) {
+				// nothing done on mousedown - release piece
+				this.releasePiece(getBoardPosition(e.getPoint()));
+				pieceGrabbedByClick = false;
+				setMouseCursor();
+			} else {
+				if (mouseDownTile != null && mouseDownTile.equals(getBoardPosition(e.getPoint()))) { // if tiles are same - click event
+					if (game.getSelectedPiece () != null) {
+						pieceGrabbedByClick = true;				
+					}
+				} else {
+					this.releasePiece(getBoardPosition(e.getPoint()));		
+					pieceGrabbedByClick = false;
+					setMouseCursor();
+				}
+				mouseDownTile = null;
+			}
 		}
 		public void mouseEntered(MouseEvent e) {}
 		public void mouseExited(MouseEvent e) {}
 		public void mouseClicked(MouseEvent e) {
-			//if (game.getSelectedPiece() == null) {
-			//	this.grabPiece(getBoardPosition(e.getPoint()));
-			//} else {
-			//	this.releasePiece(getBoardPosition(e.getPoint()));
-			//}
+			// causes double triggers on mousePressed/mouseReleased
+			// will implement custom click events
 		}
-		public void mouseMoved(MouseEvent e) {}
+		public void mouseMoved(MouseEvent e) {
+			if (pieceGrabbedByClick) {
+				dragMouse (e.getPoint()); // if piece grabbed, same as dragging
+			}
+		}
 		public void mouseDragged(MouseEvent e) {
 			dragMouse (e.getPoint());
 		}
@@ -188,6 +278,20 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 			topLevel.remove(dragComponent);
 			dragComponent = null;
 			topLevel.revalidate();
+		}
+		
+		private void setMouseCursor() {
+			if (game.getSelectedPiece() == null) {
+				vc.getContentPane().setCursor(Cursor.getDefaultCursor());
+			} else {
+				// Transparent 16 x 16 pixel cursor image.
+				BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+				// Create a new blank cursor.
+				Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+				    cursorImg, new Point(0, 0), "blank cursor");
+				// Set the blank cursor to the JFrame.
+				vc.getContentPane().setCursor(blankCursor);
+			}
 		}
 		
 		private void dragMouse (Point p) {

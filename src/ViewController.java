@@ -24,7 +24,8 @@ public class ViewController extends JFrame {
 		this.game = game;
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    this.setMinimumSize(new Dimension(600,600));
+		this.setSize(new Dimension(600,600));
+	    //this.setMinimumSize(new Dimension(600,600));
 	    this.setVisible(true);
 	    
 	    addComponentListener(new ComponentAdapter() {  
@@ -36,9 +37,7 @@ public class ViewController extends JFrame {
             }
 	    });
 	    
-	    selectView (ViewSelector.MAIN);
-	    
-	    
+	    selectView (ViewSelector.MAIN);	    
 	}
 	
 	public void selectView (ViewSelector view) {
@@ -62,7 +61,7 @@ public class ViewController extends JFrame {
 		if (currentView != null && currentView instanceof Observer) {
 			Observer o = (Observer) currentView;
 			game.addObserver(o);
-			o.update(game);
+			o.update(game); // force view to draw game
 		}
 		this.revalidate();
 		this.repaint();

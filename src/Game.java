@@ -86,6 +86,11 @@ public class Game {
     public Piece.Color getTurn () {
     	return turn;
     }
+   
+    public void reset() {
+    	initializeBoard();
+    	play();
+    }
     
     // private Methods    
     private void initializeBoard() {
