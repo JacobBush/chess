@@ -94,11 +94,6 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		protected void paintComponent (Graphics g) {
 			super.paintComponent(g);
 		}
-		/*public void printStats () {
-			System.out.println("Header size: " + header.getSize());
-			System.out.println("Body size: " + body.getSize());
-			System.out.println("Footer size: " + footer.getSize());
-		}*/
 	}
 	
 	private class GameViewHeader extends JPanel {
@@ -152,7 +147,7 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 			gc.insets = new Insets(5,5,5,20);
 			
 			JButton resetButton = new JButton("Reset");
-			homeButton.addActionListener(new ActionListener () {
+			resetButton.addActionListener(new ActionListener () {
 				public void actionPerformed(ActionEvent e) {
 					resetGame();
 		        }
