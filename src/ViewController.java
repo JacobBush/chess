@@ -6,7 +6,7 @@ public class ViewController extends JFrame {
 	
 	// screen dimension
 	public static final int HEADER_HEIGHT = 50;
-	public static final int FOOTER_HEIGHT = 0;
+	public static final int FOOTER_HEIGHT = 50;
 	
 	public static final Color CHOCOLATE_BROWN = new Color(78,46,40);
 	

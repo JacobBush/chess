@@ -224,6 +224,9 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 					this.grabPiece(mouseDownTile);
 					setMouseCursor();
 				}
+			} else if (e.getButton() == MouseEvent.BUTTON3) {
+				dropPiece();
+				setMouseCursor();
 			}
 		}
 		public void mouseReleased(MouseEvent e) {
@@ -272,11 +275,17 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 			topLevel.revalidate();
 		}
 		
+		private void dropPiece() {
+			releasePiece(null);
+		}
+		
 		private void releasePiece (Point p) {
 			game.releasePiece(p);
-			topLevel.remove(dragComponent);
-			dragComponent = null;
-			topLevel.revalidate();
+			if (dragComponent != null) {
+				topLevel.remove(dragComponent);
+				dragComponent = null;
+				topLevel.revalidate();
+			}
 		}
 		
 		private void setMouseCursor() {
@@ -295,7 +304,7 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		
 		private void dragMouse (Point p) {
 			setDragComponentPosition ();
-			revalidate();
+			//topLevel.repaint();
 		}
 		
 		private Point getBoardPosition(Point p) {

@@ -39,7 +39,7 @@ public class Game {
     }
     
     public void releasePiece (Point p) {
-    	movePiece(selectedPiece, p);
+    	if (p != null) movePiece(selectedPiece, p);
     	selectedPiece = null;
 		notifyObservers();
     }
