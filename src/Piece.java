@@ -18,61 +18,32 @@ public abstract class Piece {
 	}
 	
 	// Private Fields
-	private Point location;
 	private final Color color;
 	private final Type type;
-	private final Game game;
 	
-	// Constructors
-	public Piece (int x, int y, Color color, Type type, Game game) {
-		this.location = new Point(x,y);
+	// Constructor
+	public Piece (Color color, Type type) {
 		this.color = color;
 		this.type = type;
-		this.game = game;
-	}
-	public Piece (Point location, Color color, Type type, Game game) {
-		this.location = new Point(location); // copy constructor
-		this.color = color;
-		this.type = type;
-		this.game = game;
 	}
 	
 	// getters
-    public Point getLocation () {
-    	return new Point(location); // copy constructor
-    }
-    public Color getColor () {
+	public Color getColor () {
     	return color;
     }
     public Type getType () {
     	return type;
     }
-    public Game getGame () {
-    	return game;
-    }
-    // setters
-    public void setLocation(Point destination) {
-    	// Note - Will only set location if move is valid
-    	this.move(destination);
-    }
     
-    // Other Public Methods
+    // Public Methods
     
-    public boolean move (Point destination) {
-    	if (validMove(destination)) {
-    		this.location.setLocation(destination);
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-    
-    public boolean validMove (Point destination) {
-    	List<Point> validMoves = this.getValidMoves();
+    public boolean validMove (Point start, Point end, Game g) {
+    	List<Point> validMoves = this.getValidMoves(start, g);
     	if (validMoves == null) return false;
-    	return validMoves.contains(destination);
+    	return validMoves.contains(end);
     }
-    // Private Methods
+    
+    // Helper methods
     
     public boolean isEnemy (Piece p) {
     	return (p != null && p.getColor() != this.getColor());
@@ -87,22 +58,23 @@ public abstract class Piece {
     }
     
     // for getValidMoves loops
-    protected boolean checkValidity (Point p) {
+    protected boolean checkValidity (Point p, Game g) {
     	if (Game.validPoint (p)) {
-			Piece piece = this.getGame().getPieceAt(p);
+			Piece piece = g.getPieceAt(p);
 			return isEmpty(piece) || isEnemy(piece);
     	}
     	return false;
     }
-    protected boolean checkBreak (Point p) {
+    
+    protected boolean checkBreak (Point p, Game g) {
     	if (Game.validPoint (p)) {
-    		Piece piece = this.getGame().getPieceAt(p);
+    		Piece piece = g.getPieceAt(p);
 			return isAlly(piece) || isEnemy(piece);
     	}
     	return false;
     }
     
     // Abstract Methods
-    public abstract List<Point> getValidMoves();
+    public abstract List<Point> getValidMoves(Point p, Game g); // returns all valid points for piece at Point p in Game g
     
 }

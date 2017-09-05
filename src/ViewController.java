@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 
 public class ViewController extends JFrame {
 	
@@ -28,14 +29,14 @@ public class ViewController extends JFrame {
 	    //this.setMinimumSize(new Dimension(600,600));
 	    this.setVisible(true);
 	    
-	    addComponentListener(new ComponentAdapter() {  
+	    /*addComponentListener(new ComponentAdapter() {  
             public void componentResized(ComponentEvent evt) {
             	if (currentView != null && currentView instanceof Resizable) {
             		Resizable r = (Resizable) currentView;
             		r.updateSize();
             	}
             }
-	    });
+	    });*/
 	    
 	    selectView (ViewSelector.MAIN);	    
 	}
@@ -43,7 +44,7 @@ public class ViewController extends JFrame {
 	public void selectView (ViewSelector view) {
 		if (currentView != null && currentView instanceof Observer) {
 			Observer o = (Observer) currentView;
-			game.removeObserver(o);
+			game.deleteObserver(o);
 		}
 		this.getContentPane().removeAll();
 		switch (view) {
@@ -61,7 +62,7 @@ public class ViewController extends JFrame {
 		if (currentView != null && currentView instanceof Observer) {
 			Observer o = (Observer) currentView;
 			game.addObserver(o);
-			o.update(game); // force view to draw game
+			o.update(game, null); // force view to draw game
 		}
 		this.revalidate();
 		this.repaint();

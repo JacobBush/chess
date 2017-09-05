@@ -3,18 +3,12 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class King extends Piece {	
-    public King (Point location, Piece.Color color, Game game) {
-    	super(location, color, Piece.Type.KING, game);
+	
+    public King (Piece.Color color) {
+    	super(color, Piece.Type.KING);
     }
-    
-    public King (int x, int y, Piece.Color color, Game game) {
-    	super(x, y, color, Piece.Type.KING, game);
-    }
-
-    public List<Point> getValidMoves() {
+    public List<Point> getValidMoves(Point p, Game g) {
     	List<Point> validMoves = new ArrayList<Point>();
-    	Point p = this.getLocation();
-    	Game g = this.getGame();
     	for (int x = -1; x <= 1; x ++) {
     		for (int y = -1; y <= 1; y++) {
     			if (x == 0 && y == 0) continue;

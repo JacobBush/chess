@@ -2,9 +2,21 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
+import java.util.*;
 
-public class GameView extends JLayeredPane implements Observer, Resizable {
+public class GameView extends JPanel implements Observer {
 	
+	public GameView (ViewController vc, Game game) {
+		super();
+	}
+	
+	public void update (Observable o, Object arg) {
+		
+	}
+	
+	
+	
+	/*
 	private ViewController vc;
 	private Game game;
 	private GameViewBoard board;
@@ -444,13 +456,9 @@ public class GameView extends JLayeredPane implements Observer, Resizable {
 		}
 	}
 	
-	public void update(Object observable, String message) {
+	public void update(Observable o, Object arg) {
 		this.handleMovedPieces();
 		this.updateTurnCounter();
 		this.repaint();
-	}
-	
-    public void update(Object observable) {
-    	this.update(observable, "");
-    }
+	}*/
 }

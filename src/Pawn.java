@@ -3,20 +3,14 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Pawn extends Piece {	
-    public Pawn (Point location, Piece.Color color, Game game) {
-    	super(location, color, Piece.Type.PAWN, game);
-    }
-    
-    public Pawn (int x, int y, Piece.Color color, Game game) {
-    	super(x, y, color, Piece.Type.PAWN, game);
+    public Pawn (Piece.Color color) {
+    	super(color, Piece.Type.PAWN);
     }
 
-    public List<Point> getValidMoves() {
+    public List<Point> getValidMoves(Point p, Game g) {
     	List<Point> validMoves = new ArrayList<Point>();
     	int direction = this.getColor() == Piece.Color.BLACK ? -1 : 1;
     	int homeRow = direction == 1 ? 1 : 6;
-    	Point p = this.getLocation();
-    	Game g = this.getGame();
     	
     	Point pp = new Point(p.x, p.y + direction);
     	if (isEmpty(g.getPieceAt(pp))) validMoves.add(pp);

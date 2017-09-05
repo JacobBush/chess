@@ -2,38 +2,34 @@ import java.awt.Point;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Bishop extends Piece {	
-    public Bishop (Point location, Piece.Color color, Game game) {
-    	super(location, color, Piece.Type.BISHOP, game);
-    }
-    
-    public Bishop (int x, int y, Piece.Color color, Game game) {
-    	super(x, y, color, Piece.Type.BISHOP, game);
+public class Bishop extends Piece {
+	
+    public Bishop (Piece.Color color) {
+    	super(color, Piece.Type.BISHOP);
     }
 
-    public List<Point> getValidMoves() {
+    public List<Point> getValidMoves(Point p, Game g) {
     	List<Point> validMoves = new ArrayList<Point>();
-    	Point p = this.getLocation();
     	
     	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // up-right
     		Point pp = new Point(p.x + i, p.y + i);
-    		if (checkValidity(pp)) validMoves.add(pp);
-    		if (checkBreak(pp)) break;
+    		if (checkValidity(pp, g)) validMoves.add(pp);
+    		if (checkBreak(pp, g)) break;
     	}
     	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // down-right
     		Point pp = new Point(p.x + i, p.y - i);
-    		if (checkValidity(pp)) validMoves.add(pp);
-    		if (checkBreak(pp)) break;
+    		if (checkValidity(pp, g)) validMoves.add(pp);
+    		if (checkBreak(pp, g)) break;
     	}
     	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // up-left
     		Point pp = new Point(p.x - i, p.y + i);
-    		if (checkValidity(pp)) validMoves.add(pp);
-    		if (checkBreak(pp)) break;
+    		if (checkValidity(pp, g)) validMoves.add(pp);
+    		if (checkBreak(pp, g)) break;
     	}
     	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // down-left
     		Point pp = new Point(p.x - i, p.y - i);
-    		if (checkValidity(pp)) validMoves.add(pp);
-    		if (checkBreak(pp)) break;
+    		if (checkValidity(pp, g)) validMoves.add(pp);
+    		if (checkBreak(pp, g)) break;
     	}
     	
     	return validMoves;

@@ -1,71 +1,47 @@
 import java.awt.Point;
-import java.util.ArrayList;
+import java.util.Observable;
 
 // Implements the model
-public class Game {
+public class Game extends Observable {
 	// Constants
 	public static final int BOARD_SIZE = 8;
 	
 	// Fields
 	private Piece[][] board;
-	private ArrayList<Observer> observers;
-	private Piece selectedPiece;
 	private Piece.Color turn;
 	
 	// Constructor
     public Game () {
-    	this.observers = new ArrayList<Observer>();
-    	this.initializeBoard();
-    	selectedPiece = null;
-    	turn = null;
+    	this.resetGame();
     }
     
     // Public API
-    public void play () {
+    public void resetGame() {
+    	initializeBoard();
     	turn = Piece.Color.WHITE;
-    	notifyObservers("Game Started");
+    	setChanged();
+    	notifyObservers();
     }
     
-    public void grabPiece (Point p) {
-    	if (validPoint(p)) {
-    		Piece piece = board[p.x][p.y];
-    		if (isTurnOf(piece)) {
-        		selectedPiece = piece;
-        		notifyObservers();
-    		} else {
-    			// p is null or its not p's turn
-    		}
-    	}
-    }
-    
-    public void releasePiece (Point p) {
-    	if (p != null) movePiece(selectedPiece, p);
-    	selectedPiece = null;
-		notifyObservers();
-    }
-    
+    // This needs to be changed - piece should have no knowledge of its location
     public void movePiece (Point startingLocation, Point endingLocation) {
     	if (validPoint(startingLocation) && validPoint(endingLocation)) {
     		Piece p = board[startingLocation.x][startingLocation.y];
     		if (isTurnOf(p)) {
-        		boolean success = p.move(endingLocation);
-        		if (success) {
-        			board[startingLocation.x][startingLocation.y] = null;
-        			board[endingLocation.x][endingLocation.y] = p;
-        			changeTurn();
-        			notifyObservers();
-        		}
+    			if (p.validMove(startingLocation, endingLocation, this)) {
+    				board[startingLocation.x][startingLocation.y] = null;
+    				// TODO: Check for capture
+    				board[endingLocation.x][endingLocation.y] = p;
+    				changeTurn();
+    				setChanged();
+    			}
         	} else {
         		// p is null or its not p's turn
         	}
+    	} else {
+    		// one of the points is invalid
     	}
-    }
-    
-    public void movePiece (Piece p, Point endingLocation) {
-    	if (p != null) {
-    		Point startingLocation = p.getLocation();
-    		movePiece(startingLocation, endingLocation);
-    	}
+    	notifyObservers();
     }
     
     // Getters
@@ -74,22 +50,18 @@ public class Game {
     	return board[p.x][p.y];
     }
     
+    public Piece getPieceAt (int x, int y) {
+    	if (!validPoint(x,y)) return null;
+    	return board[x][y];
+    }
+    
     public Piece[][] getBoard () {
     	// will return shallow copy of board
     	return board.clone();
     }
     
-    public Piece getSelectedPiece () {
-    	return selectedPiece;
-    }
-    
     public Piece.Color getTurn () {
     	return turn;
-    }
-   
-    public void reset() {
-    	initializeBoard();
-    	play();
     }
     
     // private Methods    
@@ -130,22 +102,22 @@ public class Game {
     	Piece p = null;
     	switch (type) {
     	case PAWN:
-    		p = new Pawn(x,y,color, this);
+    		p = new Pawn(color);
     		break;
     	case ROOK:
-    		p = new Rook(x,y,color, this);
+    		p = new Rook(color);
     		break;
     	case KNIGHT:
-    		p = new Knight(x,y,color, this);
+    		p = new Knight(color);
     		break;
     	case BISHOP:
-    		p = new Bishop(x,y,color, this);
+    		p = new Bishop(color);
     		break;
     	case QUEEN:
-    		p = new Queen(x,y,color, this);
+    		p = new Queen(color);
     		break;
     	case KING:
-    		p = new King(x,y,color, this);
+    		p = new King(color);
     		break;
     	default:
     		break;
@@ -160,35 +132,12 @@ public class Game {
     		this.turn = Piece.Color.WHITE;
     	} else {
     		// turn is null - game not yet started
+    		this.turn = Piece.Color.WHITE;
     	}
     }
     
     private boolean isTurnOf(Piece p) {
     	return (p != null) && (p.getColor() == turn);
-    }
-    
-    
-    public static boolean validPoint (Point p) {
-    	return !(p == null || p.x < 0 || p.y < 0 || p.x >= BOARD_SIZE || p.y >= BOARD_SIZE);
-    }
-    
-    // Observers
-    public void addObserver(Observer o) {
-    	this.observers.add(o);
-    }
-    
-    public void removeObserver(Observer o) {
-    	this.observers.remove(o);
-    }
-    
-    private void notifyObservers() {
-    	notifyObservers("");
-    }
-    
-    private void notifyObservers(String message) {
-    	for (Observer o : observers) {
-    		o.update(this, message);
-    	}
     }
     
     // Useability
@@ -209,6 +158,14 @@ public class Game {
     		if (y != 0) s += "\n";
     	}
     	return s;
+    }
+
+    public static boolean validPoint (Point p) {
+    	return (p != null) && validPoint(p.x, p.y);
+    }
+    
+    public static boolean validPoint (int x, int y) {
+    	return !(x < 0 || y < 0 || x >= BOARD_SIZE || y >= BOARD_SIZE);
     }
     
     public static boolean isBlackSquare (int x, int y) {

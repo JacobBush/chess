@@ -13,6 +13,5 @@ public class Main {
     private static void runProgram () {
     	Game game = new Game();
     	new ViewController(game);
-    	game.play();
     }
 }
