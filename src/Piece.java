@@ -57,7 +57,7 @@ public abstract class Piece {
     	return p == null;
     }
     
-    // for getValidMoves loops
+    // helpers for getValidMoves
     protected boolean checkValidity (Point p, Game g) {
     	if (Game.validPoint (p)) {
 			Piece piece = g.getPieceAt(p);

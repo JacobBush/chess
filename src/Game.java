@@ -1,5 +1,6 @@
 import java.awt.Point;
 import java.util.Observable;
+import javax.swing.undo.UndoManager;
 
 // Implements the model
 public class Game extends Observable {
@@ -9,9 +10,11 @@ public class Game extends Observable {
 	// Fields
 	private Piece[][] board;
 	private Piece.Color turn;
+	private UndoManager undoManager;
 	
 	// Constructor
     public Game () {
+    	this.undoManager = new UndoManager();
     	this.resetGame();
     }
     
@@ -23,7 +26,6 @@ public class Game extends Observable {
     	notifyObservers();
     }
     
-    // This needs to be changed - piece should have no knowledge of its location
     public void movePiece (Point startingLocation, Point endingLocation) {
     	if (validPoint(startingLocation) && validPoint(endingLocation)) {
     		Piece p = board[startingLocation.x][startingLocation.y];
@@ -42,6 +44,14 @@ public class Game extends Observable {
     		// one of the points is invalid
     	}
     	notifyObservers();
+    }
+    
+    public void undo () {
+    	// TODO: Implement this
+    }
+    
+    public void redo () {
+    	// TODO: Implement this
     }
     
     // Getters

@@ -4,15 +4,328 @@ import java.awt.event.*;
 import java.awt.image.*;
 import java.util.*;
 
-public class GameView extends JPanel implements Observer {
+public class GameView extends JPanel {
+	
+	private ViewController vc;
 	
 	public GameView (ViewController vc, Game game) {
 		super();
+		this.vc = vc;
+		this.setLayout(new BorderLayout());
+		this.add(new GameViewBoard(game), BorderLayout.CENTER);
 	}
 	
-	public void update (Observable o, Object arg) {
+	
+	private class GameViewBoard extends JPanel implements Observer { //MouseListener, MouseMotionListener {
+		
+		private GameViewTile[][] tiles;
+		private Game game;
+		
+		public GameViewBoard(Game game) {
+			super();
+			// Hold onto game pointer
+			this.game = game;
+			// set background to parent
+			this.setBackground(vc.CHOCOLATE_BROWN);
+			// draw tiles
+			tiles = new GameViewTile[Game.BOARD_SIZE][Game.BOARD_SIZE];
+			this.setLayout(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			for (int x = 0; x < Game.BOARD_SIZE; x++) {
+				for (int y = 0; y < Game.BOARD_SIZE; y++) {
+					c.gridx = x; 
+					c.gridy = Game.BOARD_SIZE - y; // invert y coordinate
+					tiles[x][y] = new GameViewTile(x,y);
+					this.add(tiles[x][y], c);
+				}
+			}
+			// Register to be notified of changes
+			this.addComponentListener(new ResizeListener());
+			game.addObserver(this);
+			this.setTileSize();
+			this.repaint();
+		}
+		
+		// Mouse events
+		/*
+		private Point mouseDownTile = null;
+		private boolean pieceGrabbedByClick = false;
+		
+		
+		
+		public void mousePressed(MouseEvent e) {
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				if (pieceGrabbedByClick) {
+					// do nothing
+				} else {
+					mouseDownTile = getBoardPosition(e.getPoint());
+					this.grabPiece(mouseDownTile);
+					setMouseCursor();
+				}
+			} else if (e.getButton() == MouseEvent.BUTTON3) {
+				dropPiece();
+				setMouseCursor();
+			}
+		}
+		public void mouseReleased(MouseEvent e) {
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				if (pieceGrabbedByClick) {
+					// nothing done on mousedown - release piece
+					this.releasePiece(getBoardPosition(e.getPoint()));
+					pieceGrabbedByClick = false;
+					setMouseCursor();
+				} else {
+					if (mouseDownTile != null && mouseDownTile.equals(getBoardPosition(e.getPoint()))) { // if tiles are same - click event
+						if (game.getSelectedPiece () != null) {
+							pieceGrabbedByClick = true;				
+						}
+					} else {
+						this.releasePiece(getBoardPosition(e.getPoint()));		
+						pieceGrabbedByClick = false;
+						setMouseCursor();
+					}
+					mouseDownTile = null;
+				}
+			}
+		}
+		
+		public void mouseEntered(MouseEvent e) {}
+		public void mouseExited(MouseEvent e) {}
+		public void mouseClicked(MouseEvent e) {
+			// causes double triggers on mousePressed/mouseReleased
+			// will implement custom click events
+		}
+		
+		public void mouseMoved(MouseEvent e) {
+			if (pieceGrabbedByClick) {
+				dragMouse (e.getPoint()); // if piece grabbed, same as dragging
+			}
+		}
+		public void mouseDragged(MouseEvent e) {
+			dragMouse (e.getPoint());
+		}
+		
+		private void grabPiece (Point p) {
+			game.grabPiece(p);
+			Piece selectedPiece = game.getSelectedPiece();
+			ImageIcon selectedSprite = getSpriteForPiece(selectedPiece);
+			dragComponent = new PieceSprite(selectedSprite, new Dimension(50,50));
+			topLevel.add(dragComponent, JLayeredPane.DRAG_LAYER);
+			setDragComponentPosition();
+			topLevel.revalidate();
+		}
+		
+		private void dropPiece() {
+			releasePiece(null);
+		}
+		
+		private void releasePiece (Point p) {
+			game.releasePiece(p);
+			if (dragComponent != null) {
+				topLevel.remove(dragComponent);
+				dragComponent = null;
+				topLevel.revalidate();
+			}
+		}
+		
+		private void setMouseCursor() {
+			if (game.getSelectedPiece() == null) {
+				vc.getContentPane().setCursor(Cursor.getDefaultCursor());
+			} else {
+				// Transparent 16 x 16 pixel cursor image.
+				BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+				// Create a new blank cursor.
+				Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+				    cursorImg, new Point(0, 0), "blank cursor");
+				// Set the blank cursor to the JFrame.
+				vc.getContentPane().setCursor(blankCursor);
+			}
+		}
+		
+		private void dragMouse (Point p) {
+			setDragComponentPosition ();
+			//topLevel.repaint();
+		}*/
+		
+		private Point getBoardPosition(Point p) {
+			GameViewTile t = tiles[0][Game.BOARD_SIZE - 1];
+			if (p.x < t.getX() || p.y < t.getY()) return null; // stop integer floor issues
+			int x = (p.x - t.getX())/t.getWidth();
+			int y = (p.y - t.getY())/t.getHeight();
+			if (x >= Game.BOARD_SIZE || y >= Game.BOARD_SIZE) return null;
+			return new Point(x , Game.BOARD_SIZE - 1 - y); // change y from point coordinate to game
+		}
+		
+		@Override
+		protected void paintComponent (Graphics g) {
+			super.paintComponent(g);
+			this.paintPieces();
+			this.revalidate();
+		}
+		
+		@Override
+		public void update(Observable o, Object arg) {this.repaint();}
+		
+		private void paintPieces () {
+			Piece[][] board = game.getBoard();
+			//Piece selectedPiece = game.getSelectedPiece ();
+			//Point selectedPieceLocation = null;
+			/*if (selectedPiece != null) {
+				selectedPieceLocation = selectedPiece.getLocation();
+			}*/
+			for (int x = 0; x < Game.BOARD_SIZE; x++) {
+				for (int y = 0; y < Game.BOARD_SIZE; y++) {
+					//Piece p = board[x][y];
+					tiles[x][y].placePiece(board[x][y]);
+					//ImageIcon sprite = getSpriteForPiece(p);
+					//if (sprite != null) 
+					/*if (p == null || (selectedPieceLocation != null && selectedPieceLocation.x == x && selectedPieceLocation.y == y)) {
+						tiles[x][y].removeSprite ();
+					} else {
+						ImageIcon sprite = getSpriteForPiece(p);
+						if (sprite != null) tiles[x][y].addSprite(sprite);
+					}*/
+				}
+			}
+		}
+		
+		private void setTileSize () {
+			for (int x = 0; x < Game.BOARD_SIZE; x++) {
+				for (int y = 0; y < Game.BOARD_SIZE; y++) {
+					GameViewTile tile = tiles[x][y];
+					tile.setTileSize(this.getSize());
+				}
+			}
+		}
+		
+		// Internal Classes
+		class ResizeListener extends ComponentAdapter {
+	        public void componentResized(ComponentEvent e) {
+	        	setTileSize ();
+	        }
+		}
+		
+		
+		private class GameViewTile extends JPanel {
+			private Point position;		
+			private Dimension size;
+			private BufferedImage pieceImage;
+			
+			public GameViewTile(int x, int y) {
+				super();
+				this.setTileSize(new Dimension(50 * Game.BOARD_SIZE, 50 * Game.BOARD_SIZE));
+				position = new Point(x,y);
+				this.setBackground(Game.isBlackSquare(position) ? Color.GRAY : Color.WHITE);
+				this.setLayout(new BorderLayout());
+				this.pieceImage = null;
+			}
+			
+			public void placePiece (Piece p) {
+				pieceImage = getBufferedImageForPiece(p);
+				repaint();
+			}
+			
+			public void removePiece () {
+				this.pieceImage = null;
+				repaint();
+			}
+			
+			private BufferedImage getBufferedImageForPiece(Piece p) {
+				if (p == null) return null;
+				
+				switch(p.getType()) {
+				case PAWN:
+					if (p.getColor() == Piece.Color.BLACK) {
+						return ImageManager.BLACK_PAWN;
+					} else {
+						return ImageManager.WHITE_PAWN;
+					}
+				case ROOK:
+					if (p.getColor() == Piece.Color.BLACK) {
+						return ImageManager.BLACK_ROOK;
+					} else {
+						return ImageManager.WHITE_ROOK;
+					}
+				case KNIGHT:
+					if (p.getColor() == Piece.Color.BLACK) {
+						return ImageManager.BLACK_KNIGHT;
+					} else {
+						return ImageManager.WHITE_KNIGHT;
+					}
+				case BISHOP:
+					if (p.getColor() == Piece.Color.BLACK) {
+						return ImageManager.BLACK_BISHOP;
+					} else {
+						return ImageManager.WHITE_BISHOP;
+					}
+				case QUEEN:
+					if (p.getColor() == Piece.Color.BLACK) {
+						return ImageManager.BLACK_QUEEN;
+					} else {
+						return ImageManager.WHITE_QUEEN;
+					}
+				case KING:
+					if (p.getColor() == Piece.Color.BLACK) {
+						return ImageManager.BLACK_KING;
+					} else {
+						return ImageManager.WHITE_KING;
+					}
+				default:
+					return null;
+				}
+			}
+
+			public void setTileSize(Dimension parentSize) {
+				int minDim = Math.min(parentSize.width, parentSize.height);
+				int tileWidth = minDim / Game.BOARD_SIZE;
+				this.size = new Dimension(tileWidth,tileWidth);
+			}
+			
+			@Override
+			protected void paintComponent (Graphics g) {
+				super.paintComponent(g);
+				Graphics2D g2 = (Graphics2D) g;
+				g2.drawImage(pieceImage, 0, 0, this.getWidth(), this.getHeight(), null);
+				g2.dispose();
+			}
+			@Override
+	        public Dimension getPreferredSize() {
+	            return new Dimension(size);
+	        }
+			/*
+			// Internal Classes
+			private class PieceSprite extends JLabel {
+				BufferedImage image;
+				public PieceSprite (ImageIcon icon, Dimension size) {
+					super();
+					this.icon = icon;
+					//setSpriteSize(size);
+					this.setIcon(this.icon);
+				}
+				public void setSpriteSize(Dimension size) {
+					this.scaleImageIconToSize(size);
+				}
+				@Override
+				protected void paintComponent (Graphics g) {
+					super.paintComponent(g);
+				}
+				private void scaleImageIconToSize (Dimension size) {
+					if (this.icon != null) {
+						Image image = this.icon.getImage(); // transform it
+						Image newimg = image.getScaledInstance(size.width, size.height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+						this.icon.setImage(newimg);
+					}
+				}
+			}*/
+		}
 		
 	}
+	
+	
+	
+	//public void update (Observable o, Object arg) {
+	//	
+	//}
 	
 	
 	
@@ -197,264 +510,13 @@ public class GameView extends JPanel implements Observer {
 		}
 	}
 	
-	private class GameViewBoard extends JPanel implements MouseListener, MouseMotionListener {
-		
-		private GameViewTile[][] tiles;
-		
-		public GameViewBoard() {
-			super();
-			
-			this.setBackground(vc.CHOCOLATE_BROWN);
-			
-			tiles = new GameViewTile[Game.BOARD_SIZE][Game.BOARD_SIZE];
-			this.setLayout(new GridBagLayout());
-			GridBagConstraints c = new GridBagConstraints();
-			for (int x = 0; x < Game.BOARD_SIZE; x++) {
-				for (int y = 0; y < Game.BOARD_SIZE; y++) {
-					c.gridx = x; 
-					c.gridy = Game.BOARD_SIZE - y; // invert y coordinate
-					tiles[x][y] = new GameViewTile(x,y);
-					this.add(tiles[x][y], c);
-				}
-			}
-			
-			addMouseListener(this);
-			addMouseMotionListener(this);
-		}
-		
-		// Mouse events
-		
-		private Point mouseDownTile = null;
-		private boolean pieceGrabbedByClick = false;
-		
-		public void mousePressed(MouseEvent e) {
-			if (e.getButton() == MouseEvent.BUTTON1) {
-				if (pieceGrabbedByClick) {
-					// do nothing
-				} else {
-					mouseDownTile = getBoardPosition(e.getPoint());
-					this.grabPiece(mouseDownTile);
-					setMouseCursor();
-				}
-			} else if (e.getButton() == MouseEvent.BUTTON3) {
-				dropPiece();
-				setMouseCursor();
-			}
-		}
-		public void mouseReleased(MouseEvent e) {
-			if (e.getButton() == MouseEvent.BUTTON1) {
-				if (pieceGrabbedByClick) {
-					// nothing done on mousedown - release piece
-					this.releasePiece(getBoardPosition(e.getPoint()));
-					pieceGrabbedByClick = false;
-					setMouseCursor();
-				} else {
-					if (mouseDownTile != null && mouseDownTile.equals(getBoardPosition(e.getPoint()))) { // if tiles are same - click event
-						if (game.getSelectedPiece () != null) {
-							pieceGrabbedByClick = true;				
-						}
-					} else {
-						this.releasePiece(getBoardPosition(e.getPoint()));		
-						pieceGrabbedByClick = false;
-						setMouseCursor();
-					}
-					mouseDownTile = null;
-				}
-			}
-		}
-		public void mouseEntered(MouseEvent e) {}
-		public void mouseExited(MouseEvent e) {}
-		public void mouseClicked(MouseEvent e) {
-			// causes double triggers on mousePressed/mouseReleased
-			// will implement custom click events
-		}
-		public void mouseMoved(MouseEvent e) {
-			if (pieceGrabbedByClick) {
-				dragMouse (e.getPoint()); // if piece grabbed, same as dragging
-			}
-		}
-		public void mouseDragged(MouseEvent e) {
-			dragMouse (e.getPoint());
-		}
-		
-		private void grabPiece (Point p) {
-			game.grabPiece(p);
-			Piece selectedPiece = game.getSelectedPiece();
-			ImageIcon selectedSprite = getSpriteForPiece(selectedPiece);
-			dragComponent = new PieceSprite(selectedSprite, new Dimension(50,50));
-			topLevel.add(dragComponent, JLayeredPane.DRAG_LAYER);
-			setDragComponentPosition();
-			topLevel.revalidate();
-		}
-		
-		private void dropPiece() {
-			releasePiece(null);
-		}
-		
-		private void releasePiece (Point p) {
-			game.releasePiece(p);
-			if (dragComponent != null) {
-				topLevel.remove(dragComponent);
-				dragComponent = null;
-				topLevel.revalidate();
-			}
-		}
-		
-		private void setMouseCursor() {
-			if (game.getSelectedPiece() == null) {
-				vc.getContentPane().setCursor(Cursor.getDefaultCursor());
-			} else {
-				// Transparent 16 x 16 pixel cursor image.
-				BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-				// Create a new blank cursor.
-				Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-				    cursorImg, new Point(0, 0), "blank cursor");
-				// Set the blank cursor to the JFrame.
-				vc.getContentPane().setCursor(blankCursor);
-			}
-		}
-		
-		private void dragMouse (Point p) {
-			setDragComponentPosition ();
-			//topLevel.repaint();
-		}
-		
-		private Point getBoardPosition(Point p) {
-			GameViewTile t = tiles[0][Game.BOARD_SIZE - 1];
-			if (p.x < t.getX() || p.y < t.getY()) return null; // stop integer floor issues
-			int x = (p.x - t.getX())/t.getWidth();
-			int y = (p.y - t.getY())/t.getHeight();
-			if (x >= Game.BOARD_SIZE || y >= Game.BOARD_SIZE) return null;
-			return new Point(x , Game.BOARD_SIZE - 1 - y); // change y from point coordinate to game
-		}
-		
-		@Override
-		protected void paintComponent (Graphics g) {
-			super.paintComponent(g);
-		}
-		
-		private void paintPieces () {
-			Piece[][] board = game.getBoard();
-			Piece selectedPiece = game.getSelectedPiece ();
-			Point selectedPieceLocation = null;
-			if (selectedPiece != null) {
-				selectedPieceLocation = selectedPiece.getLocation();
-			}	
-			for (int x = 0; x < Game.BOARD_SIZE; x++) {
-				for (int y = 0; y < Game.BOARD_SIZE; y++) {
-					Piece p = board[x][y];
-					if (p == null || (selectedPieceLocation != null && selectedPieceLocation.x == x && selectedPieceLocation.y == y)) {
-						tiles[x][y].removeSprite ();
-					} else {
-						ImageIcon sprite = getSpriteForPiece(p);
-						if (sprite != null) tiles[x][y].addSprite(sprite);
-					}
-				}
-			}
-			this.revalidate();
-		}
-	}
 	
-	private ImageIcon getSpriteForPiece(Piece p) {
-		if (p == null) return null;
-		
-		switch(p.getType()) {
-		case PAWN:
-			if (p.getColor() == Piece.Color.BLACK) {
-				return ImageManager.BLACK_PAWN;
-			} else {
-				return ImageManager.WHITE_PAWN;
-			}
-		case ROOK:
-			if (p.getColor() == Piece.Color.BLACK) {
-				return ImageManager.BLACK_ROOK;
-			} else {
-				return ImageManager.WHITE_ROOK;
-			}
-		case KNIGHT:
-			if (p.getColor() == Piece.Color.BLACK) {
-				return ImageManager.BLACK_KNIGHT;
-			} else {
-				return ImageManager.WHITE_KNIGHT;
-			}
-		case BISHOP:
-			if (p.getColor() == Piece.Color.BLACK) {
-				return ImageManager.BLACK_BISHOP;
-			} else {
-				return ImageManager.WHITE_BISHOP;
-			}
-		case QUEEN:
-			if (p.getColor() == Piece.Color.BLACK) {
-				return ImageManager.BLACK_QUEEN;
-			} else {
-				return ImageManager.WHITE_QUEEN;
-			}
-		case KING:
-			if (p.getColor() == Piece.Color.BLACK) {
-				return ImageManager.BLACK_KING;
-			} else {
-				return ImageManager.WHITE_KING;
-			}
-		default:
-			return null;
-		}
-	}
 	
-	private class GameViewTile extends JPanel {
-		private Point position;
-		private JLabel pieceImage;		
-		private Dimension size;
-		
-		public GameViewTile(int x, int y) {
-			super();
-			position = new Point(x,y);
-			pieceImage = null;
-			size = new Dimension(50,50);
-			this.setBackground(Game.isBlackSquare(position) ? Color.GRAY : Color.WHITE);
-			this.setLayout(new BorderLayout());			
-		}
-		
-		public void addSprite (ImageIcon icon) {
-			if (this.pieceImage == null) {
-				pieceImage = new PieceSprite(icon, size);
-				this.add(pieceImage, BorderLayout.CENTER);
-			}
-
-		}
-		
-		public void removeSprite () {
-			if (this.pieceImage != null) {
-				this.remove(pieceImage);
-				this.pieceImage = null;
-			}
-		}
-		
-		@Override
-		protected void paintComponent (Graphics g) {
-			super.paintComponent(g);
-		}
-		@Override
-        public Dimension getPreferredSize() {
-            return new Dimension(size);
-        }
-	}
 	
-	private class PieceSprite extends JLabel {
-		public PieceSprite (ImageIcon icon, Dimension size) {
-			super();
-			icon = icon == null ? null : scaleImageIconToSize (icon, size);
-			this.setIcon(icon);
-		}
-		@Override
-		protected void paintComponent (Graphics g) {
-			super.paintComponent(g);
-		}
-		private ImageIcon scaleImageIconToSize (ImageIcon imageIcon, Dimension size) {
-			Image image = imageIcon.getImage(); // transform it 
-			Image newimg = image.getScaledInstance(size.width, size.height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
-			return new ImageIcon(newimg);  // transform it back
-		}
-	}
+	
+	
+	
+	
 	
 	public void update(Observable o, Object arg) {
 		this.handleMovedPieces();
