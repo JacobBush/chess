@@ -4,19 +4,38 @@ import java.awt.event.*;
 import java.awt.image.*;
 import java.util.*;
 
-public class GameView extends JPanel {
+public class GameView extends JLayeredPane implements MouseListener, MouseMotionListener { 
 	
 	private ViewController vc;
+	private GameViewBoard board;
 	
 	public GameView (ViewController vc, Game game) {
 		super();
 		this.vc = vc;
 		this.setLayout(new BorderLayout());
-		this.add(new GameViewBoard(game), BorderLayout.CENTER);
+		this.board = new GameViewBoard(game);
+		this.add(this.board, BorderLayout.CENTER);
+		this.addMouseListener(this);
+		this.addMouseMotionListener(this);
 	}
 	
+	public void mouseClicked(MouseEvent e) {/*Click is a weird event - will use press and release instead*/}
+	public void mousePressed(MouseEvent e) {
+		vc.addDragObject(ImageManager.BLACK_PAWN, this.board.getTileSize());
+		vc.setMouseDragged();
+	}
+	public void mouseReleased(MouseEvent e) {
+		vc.clearDragObjects ();
+	}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+	public void mouseDragged(MouseEvent e) {
+		vc.setMouseDragged();
+	}
+	public void mouseMoved(MouseEvent e) {}
 	
-	private class GameViewBoard extends JPanel implements Observer { //MouseListener, MouseMotionListener {
+	
+	private class GameViewBoard extends JPanel implements Observer {
 		
 		private GameViewTile[][] tiles;
 		private Game game;
@@ -192,10 +211,14 @@ public class GameView extends JPanel {
 		private void setTileSize () {
 			for (int x = 0; x < Game.BOARD_SIZE; x++) {
 				for (int y = 0; y < Game.BOARD_SIZE; y++) {
-					GameViewTile tile = tiles[x][y];
-					tile.setTileSize(this.getSize());
+					tiles[x][y].setTileSize(this.getTileSize());
 				}
 			}
+		}
+		public int getTileSize() {
+			int minDim = Math.min(this.getWidth(), this.getHeight());
+			int tileWidth = minDim / Game.BOARD_SIZE;
+			return tileWidth;
 		}
 		
 		// Internal Classes
@@ -208,12 +231,12 @@ public class GameView extends JPanel {
 		
 		private class GameViewTile extends JPanel {
 			private Point position;		
-			private Dimension size;
+			private int tileWidth;
 			private BufferedImage pieceImage;
 			
 			public GameViewTile(int x, int y) {
 				super();
-				this.setTileSize(new Dimension(50 * Game.BOARD_SIZE, 50 * Game.BOARD_SIZE));
+				this.setTileSize(50);
 				position = new Point(x,y);
 				this.setBackground(Game.isBlackSquare(position) ? Color.GRAY : Color.WHITE);
 				this.setLayout(new BorderLayout());
@@ -275,10 +298,8 @@ public class GameView extends JPanel {
 				}
 			}
 
-			public void setTileSize(Dimension parentSize) {
-				int minDim = Math.min(parentSize.width, parentSize.height);
-				int tileWidth = minDim / Game.BOARD_SIZE;
-				this.size = new Dimension(tileWidth,tileWidth);
+			public void setTileSize(int tileWidth) {
+				this.tileWidth = tileWidth;
 			}
 			
 			@Override
@@ -286,11 +307,10 @@ public class GameView extends JPanel {
 				super.paintComponent(g);
 				Graphics2D g2 = (Graphics2D) g;
 				g2.drawImage(pieceImage, 0, 0, this.getWidth(), this.getHeight(), null);
-				g2.dispose();
 			}
 			@Override
 	        public Dimension getPreferredSize() {
-	            return new Dimension(size);
+	            return new Dimension(tileWidth,tileWidth);
 	        }
 			/*
 			// Internal Classes

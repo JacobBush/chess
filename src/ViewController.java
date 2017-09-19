@@ -1,7 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
+import java.awt.image.*;
+import java.util.ArrayList;
+import java.util.Observer;
+
 
 public class ViewController extends JFrame {
 	
@@ -10,6 +13,8 @@ public class ViewController extends JFrame {
 	public static final int FOOTER_HEIGHT = 50;
 	
 	public static final Color CHOCOLATE_BROWN = new Color(78,46,40);
+	
+	public static final int FPS = 30;
 	
 	public enum ViewSelector {
 		MAIN,
@@ -20,9 +25,18 @@ public class ViewController extends JFrame {
 	private Game game;
 	private JComponent currentView;
 	
+	// For dragging
+	private ArrayList<BufferedImage> dragImages;
+	private DragPane dragLayer;
+	private Timer timer;
+	private int imageSize;
+	private boolean mouseDragged;
+	
 	public ViewController(Game game) {
 		super("Chess Application - Jacob Bush 2017");
 		this.game = game;
+		
+		dragImages = new ArrayList<BufferedImage>();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(new Dimension(600,600));
@@ -38,7 +52,36 @@ public class ViewController extends JFrame {
             }
 	    });*/
 	    
-	    selectView (ViewSelector.MAIN);	    
+	    // We want a glass pane
+	    this.dragLayer = new DragPane();
+	    this.setGlassPane(this.dragLayer);
+	    dragLayer.setVisible(true);
+	    
+	    this.timer = new Timer(1000/FPS, new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        		if ((dragImages.size() >= 1) && mouseDragged)  {
+        			dragLayer.repaint();
+        			mouseDragged = false;
+        		}
+        	}
+        });
+        this.timer.start();
+	    selectView (ViewSelector.MAIN);
+	}
+	
+	public void addDragObject (BufferedImage image, int imageSize) {
+		// Calling this will position the image under the mouse until it is removed
+		this.imageSize = imageSize;
+		dragImages.add(image);
+	}
+	
+	public void clearDragObjects () {
+		dragImages.clear();
+		dragLayer.repaint();
+	}
+	public void setMouseDragged() {
+		mouseDragged = true;
 	}
 	
 	public void selectView (ViewSelector view) {
@@ -68,6 +111,25 @@ public class ViewController extends JFrame {
 		this.repaint();
 	}
 	
+	private class DragPane extends JComponent {
+		public DragPane () {
+			super();
+			System.out.println(MouseInfo.getPointerInfo().getLocation());
+		}
+		
+		@Override
+		protected void paintComponent (Graphics g) {
+			super.paintComponent(g);
+			Graphics2D g2 = (Graphics2D) g;
+			Point mouseLocation = new Point(MouseInfo.getPointerInfo().getLocation().x - this.getLocationOnScreen().x,
+											MouseInfo.getPointerInfo().getLocation().y - this.getLocationOnScreen().y);
+			if (dragImages != null) {
+				for (BufferedImage bi : dragImages) {
+					g2.drawImage(bi, mouseLocation.x - imageSize/2, mouseLocation.y- imageSize/2, imageSize, imageSize, null);
+				}
+			}
+		}
+	}
 	
 	
 }
