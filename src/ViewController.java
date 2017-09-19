@@ -114,7 +114,6 @@ public class ViewController extends JFrame {
 	private class DragPane extends JComponent {
 		public DragPane () {
 			super();
-			System.out.println(MouseInfo.getPointerInfo().getLocation());
 		}
 		
 		@Override

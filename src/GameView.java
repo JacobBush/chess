@@ -8,10 +8,16 @@ public class GameView extends JLayeredPane implements MouseListener, MouseMotion
 	
 	private ViewController vc;
 	private GameViewBoard board;
+	private Game game;
+	
+	// For moving pieces
+	private Point startPoint;
 	
 	public GameView (ViewController vc, Game game) {
 		super();
 		this.vc = vc;
+		this.game = game;
+		this.startPoint = null;
 		this.setLayout(new BorderLayout());
 		this.board = new GameViewBoard(game);
 		this.add(this.board, BorderLayout.CENTER);
@@ -20,12 +26,23 @@ public class GameView extends JLayeredPane implements MouseListener, MouseMotion
 	}
 	
 	public void mouseClicked(MouseEvent e) {/*Click is a weird event - will use press and release instead*/}
-	public void mousePressed(MouseEvent e) {
-		vc.addDragObject(ImageManager.BLACK_PAWN, this.board.getTileSize());
+	public void mousePressed(MouseEvent e) {		
+		this.startPoint = board.getBoardPosition(e.getLocationOnScreen());
+		board.repaintTile(this.startPoint); // remove the piece from the tile
+		Piece piece = game.getPieceAt(this.startPoint);
+		vc.addDragObject(board.getBufferedImageForPiece(piece), this.board.getTileSize());
 		vc.setMouseDragged();
+		setMouseCursor(false);
 	}
 	public void mouseReleased(MouseEvent e) {
 		vc.clearDragObjects ();
+		Point startPoint = this.startPoint;
+		this.startPoint = null;
+		board.repaintTile(this.startPoint);// replace the piece
+		// Move the piece
+		Point endPoint = board.getBoardPosition(e.getLocationOnScreen());
+		game.movePiece (startPoint, endPoint);
+		setMouseCursor(true);
 	}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
@@ -34,6 +51,16 @@ public class GameView extends JLayeredPane implements MouseListener, MouseMotion
 	}
 	public void mouseMoved(MouseEvent e) {}
 	
+	
+	private void setMouseCursor(boolean on) {
+		if (on) {
+			vc.getGlassPane().setCursor(Cursor.getDefaultCursor());
+		} else {
+			BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+			Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+			vc.getGlassPane().setCursor(blankCursor);
+		}
+	}
 	
 	private class GameViewBoard extends JPanel implements Observer {
 		
@@ -147,26 +174,15 @@ public class GameView extends JLayeredPane implements MouseListener, MouseMotion
 			}
 		}
 		
-		private void setMouseCursor() {
-			if (game.getSelectedPiece() == null) {
-				vc.getContentPane().setCursor(Cursor.getDefaultCursor());
-			} else {
-				// Transparent 16 x 16 pixel cursor image.
-				BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-				// Create a new blank cursor.
-				Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-				    cursorImg, new Point(0, 0), "blank cursor");
-				// Set the blank cursor to the JFrame.
-				vc.getContentPane().setCursor(blankCursor);
-			}
-		}
+		
 		
 		private void dragMouse (Point p) {
 			setDragComponentPosition ();
 			//topLevel.repaint();
 		}*/
 		
-		private Point getBoardPosition(Point p) {
+		private Point getBoardPosition(Point screenPosition) {
+			Point p = new Point (screenPosition.x - this.getLocationOnScreen().x, screenPosition.y - this.getLocationOnScreen().y);
 			GameViewTile t = tiles[0][Game.BOARD_SIZE - 1];
 			if (p.x < t.getX() || p.y < t.getY()) return null; // stop integer floor issues
 			int x = (p.x - t.getX())/t.getWidth();
@@ -221,6 +237,55 @@ public class GameView extends JLayeredPane implements MouseListener, MouseMotion
 			return tileWidth;
 		}
 		
+		public void repaintTile (Point boardPosn) {
+			if (boardPosn != null) tiles[boardPosn.x][Game.BOARD_SIZE - 1 - boardPosn.y].repaint(); // change from board to array, then repaint
+		}
+		
+		public BufferedImage getBufferedImageForPiece(Piece p) {
+			if (p == null) return null;
+			
+			switch(p.getType()) {
+			case PAWN:
+				if (p.getColor() == Piece.Color.BLACK) {
+					return ImageManager.BLACK_PAWN;
+				} else {
+					return ImageManager.WHITE_PAWN;
+				}
+			case ROOK:
+				if (p.getColor() == Piece.Color.BLACK) {
+					return ImageManager.BLACK_ROOK;
+				} else {
+					return ImageManager.WHITE_ROOK;
+				}
+			case KNIGHT:
+				if (p.getColor() == Piece.Color.BLACK) {
+					return ImageManager.BLACK_KNIGHT;
+				} else {
+					return ImageManager.WHITE_KNIGHT;
+				}
+			case BISHOP:
+				if (p.getColor() == Piece.Color.BLACK) {
+					return ImageManager.BLACK_BISHOP;
+				} else {
+					return ImageManager.WHITE_BISHOP;
+				}
+			case QUEEN:
+				if (p.getColor() == Piece.Color.BLACK) {
+					return ImageManager.BLACK_QUEEN;
+				} else {
+					return ImageManager.WHITE_QUEEN;
+				}
+			case KING:
+				if (p.getColor() == Piece.Color.BLACK) {
+					return ImageManager.BLACK_KING;
+				} else {
+					return ImageManager.WHITE_KING;
+				}
+			default:
+				return null;
+			}
+		}
+		
 		// Internal Classes
 		class ResizeListener extends ComponentAdapter {
 	        public void componentResized(ComponentEvent e) {
@@ -252,51 +317,6 @@ public class GameView extends JLayeredPane implements MouseListener, MouseMotion
 				this.pieceImage = null;
 				repaint();
 			}
-			
-			private BufferedImage getBufferedImageForPiece(Piece p) {
-				if (p == null) return null;
-				
-				switch(p.getType()) {
-				case PAWN:
-					if (p.getColor() == Piece.Color.BLACK) {
-						return ImageManager.BLACK_PAWN;
-					} else {
-						return ImageManager.WHITE_PAWN;
-					}
-				case ROOK:
-					if (p.getColor() == Piece.Color.BLACK) {
-						return ImageManager.BLACK_ROOK;
-					} else {
-						return ImageManager.WHITE_ROOK;
-					}
-				case KNIGHT:
-					if (p.getColor() == Piece.Color.BLACK) {
-						return ImageManager.BLACK_KNIGHT;
-					} else {
-						return ImageManager.WHITE_KNIGHT;
-					}
-				case BISHOP:
-					if (p.getColor() == Piece.Color.BLACK) {
-						return ImageManager.BLACK_BISHOP;
-					} else {
-						return ImageManager.WHITE_BISHOP;
-					}
-				case QUEEN:
-					if (p.getColor() == Piece.Color.BLACK) {
-						return ImageManager.BLACK_QUEEN;
-					} else {
-						return ImageManager.WHITE_QUEEN;
-					}
-				case KING:
-					if (p.getColor() == Piece.Color.BLACK) {
-						return ImageManager.BLACK_KING;
-					} else {
-						return ImageManager.WHITE_KING;
-					}
-				default:
-					return null;
-				}
-			}
 
 			public void setTileSize(int tileWidth) {
 				this.tileWidth = tileWidth;
@@ -305,8 +325,10 @@ public class GameView extends JLayeredPane implements MouseListener, MouseMotion
 			@Override
 			protected void paintComponent (Graphics g) {
 				super.paintComponent(g);
-				Graphics2D g2 = (Graphics2D) g;
-				g2.drawImage(pieceImage, 0, 0, this.getWidth(), this.getHeight(), null);
+				if (startPoint == null || !startPoint.equals(position)) {// paint piece if not grabbed
+					Graphics2D g2 = (Graphics2D) g;
+					g2.drawImage(pieceImage, 0, 0, this.getWidth(), this.getHeight(), null);
+				}				
 			}
 			@Override
 	        public Dimension getPreferredSize() {
