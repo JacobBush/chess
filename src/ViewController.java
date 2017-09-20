@@ -62,8 +62,8 @@ public class ViewController extends JFrame {
         	public void actionPerformed(ActionEvent e) {
         		if ((dragImages.size() >= 1) && mouseDragged)  {
         			dragLayer.repaint();
-        			mouseDragged = false;
         		}
+    			mouseDragged = false;
         	}
         });
         this.timer.start();
@@ -85,10 +85,6 @@ public class ViewController extends JFrame {
 	}
 	
 	public void selectView (ViewSelector view) {
-		if (currentView != null && currentView instanceof Observer) {
-			Observer o = (Observer) currentView;
-			game.deleteObserver(o);
-		}
 		this.getContentPane().removeAll();
 		switch (view) {
 		case MAIN:
@@ -101,11 +97,6 @@ public class ViewController extends JFrame {
 			break;
 		default:
 			break;
-		}
-		if (currentView != null && currentView instanceof Observer) {
-			Observer o = (Observer) currentView;
-			game.addObserver(o);
-			o.update(game, null); // force view to draw game
 		}
 		this.revalidate();
 		this.repaint();
@@ -120,11 +111,12 @@ public class ViewController extends JFrame {
 		protected void paintComponent (Graphics g) {
 			super.paintComponent(g);
 			Graphics2D g2 = (Graphics2D) g;
-			Point mouseLocation = new Point(MouseInfo.getPointerInfo().getLocation().x - this.getLocationOnScreen().x,
-											MouseInfo.getPointerInfo().getLocation().y - this.getLocationOnScreen().y);
+			int mx = MouseInfo.getPointerInfo().getLocation().x - this.getLocationOnScreen().x;
+			int my = MouseInfo.getPointerInfo().getLocation().y - this.getLocationOnScreen().y;
+			
 			if (dragImages != null) {
 				for (BufferedImage bi : dragImages) {
-					g2.drawImage(bi, mouseLocation.x - imageSize/2, mouseLocation.y- imageSize/2, imageSize, imageSize, null);
+					g2.drawImage(bi, mx - imageSize/2, my - imageSize/2, imageSize, imageSize, null);
 				}
 			}
 		}

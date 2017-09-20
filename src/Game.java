@@ -46,6 +46,13 @@ public class Game extends Observable {
     	notifyObservers();
     }
     
+    public boolean movablePiece (Point location) {
+    	// Will return true if piece at location is movable
+    	Piece p = board[location.x][location.y];
+    	// TODO: Add checks for check and the like
+    	return (p != null && p.getColor() == turn); 
+    }
+    
     public void undo () {
     	// TODO: Implement this
     }
