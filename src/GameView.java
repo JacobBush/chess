@@ -3,8 +3,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import java.util.*;
+// For sounds
+import java.io.File;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class GameView extends JLayeredPane  { 
+	
+	// Sound for moving pieces
+	static File knockSound = new File ("audio/knock.wav");
 	
 	private ViewController vc;
 	private GameViewBoard board;
@@ -28,8 +35,10 @@ public class GameView extends JLayeredPane  {
 		// For moving pieces
 		private Point startPoint;
 		
+		
 		public GameViewBoard(Game game) {
 			super();
+			
 			this.startPoint = null;
 			this.game = game;
 			this.setBackground(vc.CHOCOLATE_BROWN);
@@ -139,7 +148,20 @@ public class GameView extends JLayeredPane  {
 		}
 		
 		@Override
-		public void update(Observable o, Object arg) {this.redrawPieces ();}
+		public void update(Observable o, Object arg) {
+			this.redrawPieces ();
+			this.playSound();
+		}
+		
+		private void playSound() {
+			try {
+				Clip clip = AudioSystem.getClip();
+				clip.open(AudioSystem.getAudioInputStream(knockSound));
+				clip.start();
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		}
 		
 		private void paintPieces () {
 			Piece[][] board = game.getBoard();
