@@ -48,10 +48,33 @@ public class GameView extends JLayeredPane  {
 			game.addObserver(this);
 			this.setTileSize();
 			this.redrawPieces();
-			this.addComponentListener(new ResizeListener());
+			// Listen for resize events
+			this.addComponentListener(new ComponentAdapter() {
+		        public void componentResized(ComponentEvent e) {
+		        	setTileSize ();
+		        }
+			});
+			// Listen for mouse events
 			this.addMouseListener(this);
 			this.addMouseMotionListener(this);
+			
+			// Undo and redo Listeners (note: will still work even when returned to home screen)
+			Action undo = new AbstractAction() {
+			    public void actionPerformed(ActionEvent e) {game.undo();}
+			};
+			Action redo = new AbstractAction() {
+				public void actionPerformed(ActionEvent e) {game.redo();}
+			};
+			
+			InputMap im = vc.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+			im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "undo");
+			im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "redo");
+			
+			ActionMap am = vc.getRootPane().getActionMap();
+			am.put("undo", undo);
+			am.put("redo", redo);
 		}
+		
 		
 		
 		public void mouseClicked(MouseEvent e) {/*Click is a weird event - will use press and release instead*/}
@@ -190,16 +213,9 @@ public class GameView extends JLayeredPane  {
 			default:
 				return null;
 			}
-		}
+		}		
 		
-		// Internal Classes
-		class ResizeListener extends ComponentAdapter {
-	        public void componentResized(ComponentEvent e) {
-	        	setTileSize ();
-	        }
-		}
-		
-		
+		// Represent the individual squares of the board		
 		private class GameViewTile extends JPanel {
 			private Point position;		
 			private int tileWidth;
@@ -245,6 +261,52 @@ public class GameView extends JLayeredPane  {
 			super();
 			this.setPreferredSize(new Dimension(0,vc.HEADER_HEIGHT));
 			this.setBackground(Color.BLACK);
+			this.setLayout(new BorderLayout());
+			
+			GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridheight = GridBagConstraints.REMAINDER;
+            gbc.fill = GridBagConstraints.VERTICAL;
+			
+			// Left Buttons
+			gbc.insets = new Insets(0, 5, 0, 0);
+			
+			JPanel leftButtons = new JPanel();
+			leftButtons.setBackground(Color.BLACK);
+			leftButtons.setLayout(new GridBagLayout());
+			this.add(leftButtons, BorderLayout.WEST);
+			
+			JButton home = new JButton("Home");
+			home.addActionListener(new ActionListener() {
+				  public void actionPerformed(ActionEvent e) {
+					  vc.selectView(ViewController.ViewSelector.MAIN);
+				  }
+			});
+			leftButtons.add(home, gbc);
+			
+			// Right buttons
+			gbc.insets = new Insets(0, 0, 0, 5);
+			
+			JPanel rightButtons = new JPanel();
+			rightButtons.setBackground(Color.BLACK);
+			rightButtons.setLayout(new GridBagLayout());
+			this.add(rightButtons, BorderLayout.EAST);
+
+			
+			JButton undo = new JButton(Character.toString((char) 8678) + " Undo");// Unicode: LEFTWARDS WHITE ARROW
+			undo.addActionListener(new ActionListener() {
+				  public void actionPerformed(ActionEvent e) {
+					  game.undo();
+				  }
+			});
+			rightButtons.add(undo, gbc);
+			
+			JButton redo = new JButton("Redo " + Character.toString((char) 8680));// Unicode: LEFTWARDS WHITE ARROW
+			redo.addActionListener(new ActionListener() {
+				  public void actionPerformed(ActionEvent e) {
+					  game.redo();
+				  }
+			});
+			rightButtons.add(redo, gbc);
 		}
 	}
 	

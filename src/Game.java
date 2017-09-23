@@ -1,6 +1,6 @@
 import java.awt.Point;
 import java.util.Observable;
-import javax.swing.undo.UndoManager;
+import java.util.Stack;
 
 // Implements the model
 public class Game extends Observable {
@@ -10,11 +10,11 @@ public class Game extends Observable {
 	// Fields
 	private Piece[][] board;
 	private Piece.Color turn;
-	private UndoManager undoManager;
+	private Stack<Piece[][]> undoStack;
+	private Stack<Piece[][]> redoStack;
 	
 	// Constructor
     public Game () {
-    	this.undoManager = new UndoManager();
     	this.resetGame();
     }
     
@@ -22,17 +22,29 @@ public class Game extends Observable {
     public void resetGame() {
     	initializeBoard();
     	turn = Piece.Color.WHITE;
+    	this.undoStack = new Stack<Piece[][]>();
+    	this.redoStack = new Stack<Piece[][]>();
     	setChanged();
     	notifyObservers();
     }
     
     public void movePiece (Point startingLocation, Point endingLocation) {
+    	// TODO:
+    	//    -En-passant
+    	//    -Castling
+    	//    -Check/mate
+    	//    -Pawn Promotion
+    	
+    	
     	if (validPoint(startingLocation) && validPoint(endingLocation)) {
     		Piece p = board[startingLocation.x][startingLocation.y];
     		if (isTurnOf(p)) {
     			if (p.validMove(startingLocation, endingLocation, this)) {
+    				// Add to undo Stack
+    				undoStack.push(this.getBoard());
+    				clearStack(redoStack);
+    				// Move Piece
     				board[startingLocation.x][startingLocation.y] = null;
-    				// TODO: Check for capture
     				board[endingLocation.x][endingLocation.y] = p;
     				changeTurn();
     				setChanged();
@@ -47,18 +59,36 @@ public class Game extends Observable {
     }
     
     public boolean movablePiece (Point location) {
-    	// Will return true if piece at location is movable
+    	if (location == null) return false;
     	Piece p = board[location.x][location.y];
     	// TODO: Add checks for check and the like
     	return (p != null && p.getColor() == turn); 
     }
     
+    // Undo / Redo
+    
     public void undo () {
-    	// TODO: Implement this
+    	if (!undoStack.empty()) {
+    		this.redoStack.push(this.getBoard());
+    		this.board = undoStack.pop();
+    		this.changeTurn(); // need to undo turn change
+    		this.setChanged();
+    		this.notifyObservers();
+    	}
     }
     
     public void redo () {
-    	// TODO: Implement this
+    	if (!redoStack.empty()) {
+    		this.undoStack.push(this.getBoard());
+    		this.board = redoStack.pop();
+    		this.changeTurn(); // need to redo turn change
+    		this.setChanged();
+    		this.notifyObservers();
+    	}
+    }
+    
+    private void clearStack(Stack s) {
+    	while (!s.empty()) s.pop();
     }
     
     // Getters
@@ -74,7 +104,13 @@ public class Game extends Observable {
     
     public Piece[][] getBoard () {
     	// will return shallow copy of board
-    	return board.clone();
+    	Piece [][] boardCopy = new Piece[BOARD_SIZE][BOARD_SIZE];
+    	for (int x = 0; x < BOARD_SIZE; x++) {
+    		for (int y = 0; y < BOARD_SIZE; y++) {
+        		boardCopy[x][y] = board[x][y];
+        	}
+    	}
+    	return boardCopy;
     }
     
     public Piece.Color getTurn () {
