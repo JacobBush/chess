@@ -10,7 +10,7 @@ import javax.sound.sampled.Clip;
 
 public class GameView extends JLayeredPane  { 
 	
-	// Sound for moving pieces
+	// Sound for moving pieces (Loaded for GameViewBoard statically)
 	static File knockSound = new File ("audio/knock.wav");
 	
 	private ViewController vc;
