@@ -8,6 +8,8 @@ import java.io.File;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
+//TODO: move GameViewBoard to its own file
+
 public class GameView extends JLayeredPane  { 
 	
 	// Sound for moving pieces (Loaded for GameViewBoard statically)
