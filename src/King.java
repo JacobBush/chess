@@ -17,7 +17,39 @@ public class King extends Piece {
     			if (isEmpty(piece) || isEnemy(piece)) validMoves.add(new Move(this,p,pp,null));
     		}
     	}
+	// Castling
+	// Need : king hasn't moved
+	// 	  rook hasn't moved
+	//        there's clear space
+	if (getCastle(p, -1, g) != null) {
+	    //Possible to castle to the left
+	    System.out.println("castleleft");
+	}
+	if (getCastle(p, 1, g) != null) {
+	    // Possible to castle to the right
+	    System.out.println("castleright");
+	}
     	return validMoves;
+    }
+
+    private Move getCastle(Point posn, int direction, Game game) {
+	if (!game.hasMoved(this)) {
+	    Point p = new Point(posn.x + direction, posn.y);
+	    while (game.validPoint(p)) {
+		Piece piece = game.getPieceAt(p);
+		if (piece == null) {
+		    p.translate(direction, 0);
+		    continue;
+		} else if (piece instanceof Rook) {
+		    if (!game.hasMoved(piece)) {
+			// rook hasn't moved
+		    }
+		} else {
+		    return null;
+		}
+	    }
+	}
+	return null;
     }
     
     // usability

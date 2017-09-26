@@ -2,17 +2,19 @@ import java.awt.Point;
 import java.util.Observable;
 import java.util.Stack;
 import java.util.List;
+import java.util.HashSet;
 
 // Implements the model
 public class Game extends Observable {
-	// Constants
-	public static final int BOARD_SIZE = 8;
+    // Constants
+    public static final int BOARD_SIZE = 8;
 	
-	// Fields
-	private Piece[][] board;
-	private Piece.Color turn;
-	private Stack<Piece[][]> undoStack;
-	private Stack<Piece[][]> redoStack;
+    // Fields
+    private Piece[][] board;
+    private Piece.Color turn;
+    private Stack<Piece[][]> undoStack;
+    private Stack<Piece[][]> redoStack;
+    private HashSet<Piece> movedPieces; // used for castling
 	
 	// Constructor
     public Game () {
@@ -25,6 +27,7 @@ public class Game extends Observable {
     	turn = Piece.Color.WHITE;
     	this.undoStack = new Stack<Piece[][]>();
     	this.redoStack = new Stack<Piece[][]>();
+	this.movedPieces = new HashSet<Piece>();
     	setChanged();
     	notifyObservers();
     }
@@ -57,16 +60,22 @@ public class Game extends Observable {
             undoStack.push(this.getBoard());
     	    clearStack(redoStack);
     	    // Move Piece
+	    Piece p = m.getPiece();
     	    board[m.getStartLoc().x][m.getStartLoc().y] = null;
-    	    board[m.getEndLoc().x][m.getEndLoc().y] = m.getPiece();
+    	    board[m.getEndLoc().x][m.getEndLoc().y] = p;
 	    // execute side effects
 	    List<Move> se = m.getSideEffects();
 	    if (se != null) {
 		for (Move move : se) executeMove(move);
 	    }
+	    movedPieces.add(p);
     	    changeTurn();
     	    setChanged();
     	}
+    }
+
+    public boolean hasMoved (Piece p) {
+	return movedPieces.contains(p);
     }
     
     public boolean movablePiece (Point location) {
