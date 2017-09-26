@@ -46,11 +46,11 @@ public abstract class Piece {
     // Helper methods
     
     public boolean isEnemy (Piece p) {
-    	return (p != null && p.getColor() != this.getColor());
+    	return (!isEmpty(p) && p.getColor() != this.getColor());
     }
     
     public boolean isAlly (Piece p) {
-    	return (p != null && p.getColor() == this.getColor());
+    	return (!isEmpty(p) && p.getColor() == this.getColor());
     }
     
     public boolean isEmpty (Piece p) {
