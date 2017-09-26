@@ -57,9 +57,8 @@ public class Game extends Observable {
             undoStack.push(this.getBoard());
     	    clearStack(redoStack);
     	    // Move Piece
-	    Piece p = board[m.getStartLoc().x][m.getStartLoc().y];
     	    board[m.getStartLoc().x][m.getStartLoc().y] = null;
-    	    board[m.getEndLoc().x][m.getEndLoc().y] = p;
+    	    board[m.getEndLoc().x][m.getEndLoc().y] = m.getPiece();
 	    // execute side effects
 	    List<Move> se = m.getSideEffects();
 	    if (se != null) {

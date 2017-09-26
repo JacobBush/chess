@@ -14,7 +14,7 @@ public class King extends Piece {
     			if (x == 0 && y == 0) continue;
     			Point pp = new Point(p.x + x, p.y + y);
     			Piece piece = g.getPieceAt(pp);
-    			if (isEmpty(piece) || isEnemy(piece)) validMoves.add(new Move(p,pp,null));
+    			if (isEmpty(piece) || isEnemy(piece)) validMoves.add(new Move(this,p,pp,null));
     		}
     	}
     	return validMoves;

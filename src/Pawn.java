@@ -13,18 +13,18 @@ public class Pawn extends Piece {
     	int homeRow = direction == 1 ? 1 : 6;
     	
     	Point pp = new Point(p.x, p.y + direction);
-    	if (isEmpty(g.getPieceAt(pp))) validMoves.add(new Move (p,pp,null));
+    	if (isEmpty(g.getPieceAt(pp))) validMoves.add(new Move (this,p,pp,null));
     	
 		pp = new Point(p.x, p.y + 2*direction);
-		if (p.y == homeRow && isEmpty(g.getPieceAt(pp))) validMoves.add(new Move(p,pp,null));
+		if (p.y == homeRow && isEmpty(g.getPieceAt(pp))) validMoves.add(new Move(this,p,pp,null));
 		
 		pp = new Point (p.x - 1, p.y + direction);
 		Piece piece = g.getPieceAt(pp);
-		if (isEnemy(g.getPieceAt(pp))) validMoves.add(new Move(p,pp,null));
+		if (isEnemy(g.getPieceAt(pp))) validMoves.add(new Move(this,p,pp,null));
     	
 		pp = new Point (p.x + 1, p.y + direction);
 		piece = g.getPieceAt(pp);
-		if (isEnemy(g.getPieceAt(pp))) validMoves.add(new Move(p,pp,null));
+		if (isEnemy(g.getPieceAt(pp))) validMoves.add(new Move(this,p,pp,null));
 		
     	return validMoves;
     }
