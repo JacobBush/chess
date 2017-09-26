@@ -35,7 +35,7 @@ public class Game extends Observable {
     	//    -Check/mate
     	//    -Pawn Promotion
     	
-    	
+
     	if (validPoint(startingLocation) && validPoint(endingLocation)) {
     		Piece p = board[startingLocation.x][startingLocation.y];
     		if (isTurnOf(p)) {

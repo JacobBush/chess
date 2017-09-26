@@ -34,11 +34,15 @@ public class GameView extends JLayeredPane  {
 		private Game game;
 		// For moving pieces
 		private Point startPoint;
+		// Sound
+		private boolean muteSound;
 		
 		
 		public GameViewBoard(Game game) {
 			super();
 			
+			this.unmute();
+
 			this.startPoint = null;
 			this.game = game;
 			this.setBackground(vc.CHOCOLATE_BROWN);
@@ -154,13 +158,24 @@ public class GameView extends JLayeredPane  {
 		}
 		
 		private void playSound() {
+			if (muteSound) return;
 			try {
 				Clip clip = AudioSystem.getClip();
 				clip.open(AudioSystem.getAudioInputStream(knockSound));
 				clip.start();
 			} catch (Exception e) {
-				System.out.println(e);
+				System.out.println(e + " : sound not supported in call to GameView.playSound().");
+				System.out.println("Muting sound.");
+				this.mute();
 			}
+		}
+
+		public void mute () {
+		    this.muteSound = true;
+		}
+
+		public void unmute () {
+		    this.muteSound = false;
 		}
 		
 		private void paintPieces () {
