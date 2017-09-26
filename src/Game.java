@@ -1,6 +1,7 @@
 import java.awt.Point;
 import java.util.Observable;
 import java.util.Stack;
+import java.util.List;
 
 // Implements the model
 public class Game extends Observable {
@@ -39,16 +40,8 @@ public class Game extends Observable {
     	if (validPoint(startingLocation) && validPoint(endingLocation)) {
     		Piece p = board[startingLocation.x][startingLocation.y];
     		if (isTurnOf(p)) {
-    			if (p.validMove(startingLocation, endingLocation, this)) {
-    				// Add to undo Stack
-    				undoStack.push(this.getBoard());
-    				clearStack(redoStack);
-    				// Move Piece
-    				board[startingLocation.x][startingLocation.y] = null;
-    				board[endingLocation.x][endingLocation.y] = p;
-    				changeTurn();
-    				setChanged();
-    			}
+		    Move m = p.getMove(startingLocation, endingLocation, this);
+		    executeMove(m);
         	} else {
         		// p is null or its not p's turn
         	}
@@ -56,6 +49,25 @@ public class Game extends Observable {
     		// one of the points is invalid
     	}
     	notifyObservers();
+    }
+
+    private void executeMove (Move m) {
+	if (m != null) {
+    	    // Add to undo Stack
+            undoStack.push(this.getBoard());
+    	    clearStack(redoStack);
+    	    // Move Piece
+	    Piece p = board[m.getStartLoc().x][m.getStartLoc().y];
+    	    board[m.getStartLoc().x][m.getStartLoc().y] = null;
+    	    board[m.getEndLoc().x][m.getEndLoc().y] = p;
+	    // execute side effects
+	    List<Move> se = m.getSideEffects();
+	    if (se != null) {
+		for (Move move : se) executeMove(move);
+	    }
+    	    changeTurn();
+    	    setChanged();
+    	}
     }
     
     public boolean movablePiece (Point location) {

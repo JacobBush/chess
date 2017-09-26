@@ -38,9 +38,25 @@ public abstract class Piece {
     // Public Methods
     
     public boolean validMove (Point start, Point end, Game g) {
-    	List<Point> validMoves = this.getValidMoves(start, g);
+    	List<Move> validMoves = this.getValidMoves(start, g);
     	if (validMoves == null) return false;
-    	return validMoves.contains(end);
+	for (Move m : validMoves) {
+	    if (m.getEndLoc().equals(end)) {
+		return true;
+	    }
+	}
+    	return false;
+    }
+
+    public Move getMove (Point start, Point end, Game g) {	
+    	List<Move> validMoves = this.getValidMoves(start, g);
+    	if (validMoves == null) return null;
+	for (Move m : validMoves) {
+	    if (m.getEndLoc().equals(end)) {
+		return m;
+	    }
+	}
+    	return null;
     }
     
     // Helper methods
@@ -75,6 +91,6 @@ public abstract class Piece {
     }
     
     // Abstract Methods
-    public abstract List<Point> getValidMoves(Point p, Game g); // returns all valid points for piece at Point p in Game g
+    public abstract List<Move> getValidMoves(Point p, Game g); // returns all valid points for piece at Point p in Game g
     
 }
