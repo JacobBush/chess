@@ -12,8 +12,8 @@ public class Game extends Observable {
     // Fields
     private Piece[][] board;
     private Piece.Color turn;
-    private Stack<Piece[][]> undoStack;
-    private Stack<Piece[][]> redoStack;
+    private Stack<Move> undoStack;
+    private Stack<Move> redoStack;
     private HashSet<Piece> movedPieces; // used for castling
 	
 	// Constructor
@@ -25,8 +25,8 @@ public class Game extends Observable {
     public void resetGame() {
     	initializeBoard();
     	turn = Piece.Color.WHITE;
-    	this.undoStack = new Stack<Piece[][]>();
-    	this.redoStack = new Stack<Piece[][]>();
+    	this.undoStack = new Stack<Move>();
+    	this.redoStack = new Stack<Move>();
 	this.movedPieces = new HashSet<Piece>();
     	setChanged();
     	notifyObservers();
@@ -44,7 +44,13 @@ public class Game extends Observable {
     		Piece p = board[startingLocation.x][startingLocation.y];
     		if (isTurnOf(p)) {
 		    Move m = p.getMove(startingLocation, endingLocation, this);
-		    executeMove(m);
+		    if (m != null) {
+			if (executeMove(m)) {
+			    undoStack.push(m);
+			    clearStack(redoStack);
+			    changeTurn();
+			}
+		    }
         	} else {
         		// p is null or its not p's turn
         	}
@@ -54,24 +60,47 @@ public class Game extends Observable {
     	notifyObservers();
     }
 
-    private void executeMove (Move m) {
-	if (m != null) {
-    	    // Add to undo Stack
-            undoStack.push(this.getBoard());
-    	    clearStack(redoStack);
-    	    // Move Piece
-	    Piece p = m.getPiece();
-    	    board[m.getStartLoc().x][m.getStartLoc().y] = null;
-    	    board[m.getEndLoc().x][m.getEndLoc().y] = p;
+    private boolean executeMove (Move m) {
+	// True if moved successful
+	if (m != null) { 
 	    // execute side effects
 	    List<Move> se = m.getSideEffects();
 	    if (se != null) {
 		for (Move move : se) executeMove(move);
 	    }
+	    // Move the piece
+	    Piece p = m.getPiece();
+	    if (m.getStartLoc() != null)
+    		board[m.getStartLoc().x][m.getStartLoc().y] = null;
+    	    if (m.getEndLoc() != null)
+		board[m.getEndLoc().x][m.getEndLoc().y] = p;
+	    // TODO: This won't work with undo - will need to be fixed
 	    movedPieces.add(p);
-    	    changeTurn();
     	    setChanged();
+	    return true;
     	}
+	return false;
+    }
+
+    private boolean revertMove (Move m) {
+	// True if moved successful
+	if (m!= null) {
+	    // Move the piece
+	    Piece p = m.getPiece();
+    	    if (m.getEndLoc() != null)
+		board[m.getEndLoc().x][m.getEndLoc().y] = null;
+    	    if (m.getStartLoc() != null)
+		board[m.getStartLoc().x][m.getStartLoc().y] = p;
+
+	    // revert side effects
+	    List<Move> se = m.getSideEffects();
+	    if (se != null) {
+		for (Move move : se) revertMove(move);
+	    }
+    	    setChanged();
+	    return true;
+	}
+	return false;
     }
 
     public boolean hasMoved (Piece p) {
@@ -88,23 +117,29 @@ public class Game extends Observable {
     // Undo / Redo
     
     public void undo () {
-    	if (!undoStack.empty()) {
-    		this.redoStack.push(this.getBoard());
-    		this.board = undoStack.pop();
-    		this.changeTurn(); // need to undo turn change
-    		this.setChanged();
-    		this.notifyObservers();
-    	}
+	if (!undoStack.empty()) {
+	    Move m = undoStack.pop();
+	    if (this.revertMove(m)) {
+		this.redoStack.push(m);
+		changeTurn();
+	    } else {
+	        this.undoStack.push(m);
+	    }
+    	    this.notifyObservers();
+	}
     }
     
     public void redo () {
     	if (!redoStack.empty()) {
-    		this.undoStack.push(this.getBoard());
-    		this.board = redoStack.pop();
-    		this.changeTurn(); // need to redo turn change
-    		this.setChanged();
-    		this.notifyObservers();
-    	}
+	    Move m = redoStack.pop();
+	    if (this.executeMove(m)) {
+		this.undoStack.push(m);
+		changeTurn();
+	    } else {
+		this.redoStack.push(m);
+	    }
+	    this.notifyObservers();
+	}
     }
     
     private void clearStack(Stack s) {

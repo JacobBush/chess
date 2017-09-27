@@ -9,12 +9,18 @@ public class King extends Piece {
     }
     public List<Move> getValidMoves(Point p, Game g) {
     	List<Move> validMoves = new ArrayList<Move>();
+	ArrayList<Move> sideEffects;
     	for (int x = -1; x <= 1; x ++) {
     		for (int y = -1; y <= 1; y++) {
     			if (x == 0 && y == 0) continue;
     			Point pp = new Point(p.x + x, p.y + y);
     			Piece piece = g.getPieceAt(pp);
-    			if (isEmpty(piece) || isEnemy(piece)) validMoves.add(new Move(this,p,pp,null));
+			if (isEnemy(piece)) {
+			    sideEffects = new ArrayList<Move>();
+			    sideEffects.add(new Move(piece, pp, null, null));
+			    validMoves.add(new Move(this,p,pp,sideEffects));
+			}
+    			if (isEmpty(piece)) validMoves.add(new Move(this,p,pp,null));
     		}
     	}
 	// Castling
