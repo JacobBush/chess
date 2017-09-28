@@ -9,30 +9,39 @@ public class Knight extends Piece {
 
     public List<Move> getValidMoves(Point p, Game g) {
     	ArrayList<Move> validMoves = new ArrayList<Move>();
-    	
+	Move m;
+
     	Point pp = new Point (p.x + 2, p.y + 1); // right-up
-    	if (checkValidity (pp, g)) validMoves.add(new Move(this,p,pp,null));
+	m = getMoveWithCapture(p,pp,g);
+	if (m != null) validMoves.add(m);
 
     	pp = new Point (p.x + 2, p.y - 1); // right-down
-    	if (checkValidity (pp, g)) validMoves.add(new Move(this,p,pp,null));
+	m = getMoveWithCapture(p,pp,g);
+	if (m != null) validMoves.add(m);
 
     	pp = new Point (p.x - 2, p.y + 1); // left-up
-    	if (checkValidity (pp, g)) validMoves.add(new Move(this,p,pp,null));
+	m = getMoveWithCapture(p,pp,g);
+	if (m != null) validMoves.add(m);
 
     	pp = new Point (p.x - 2, p.y - 1); // left-down
-    	if (checkValidity (pp, g)) validMoves.add(new Move(this,p,pp,null));
+	m = getMoveWithCapture(p,pp,g);
+	if (m != null) validMoves.add(m);
     	
     	pp = new Point (p.x + 1, p.y + 2); // up-right
-    	if (checkValidity (pp, g)) validMoves.add(new Move(this,p,pp,null));
+	m = getMoveWithCapture(p,pp,g);
+	if (m != null) validMoves.add(m);
 
     	pp = new Point (p.x - 1, p.y + 2); // up-left
-    	if (checkValidity (pp, g)) validMoves.add(new Move(this,p,pp,null));
+	m = getMoveWithCapture(p,pp,g);
+	if (m != null) validMoves.add(m);
 
     	pp = new Point (p.x + 1, p.y - 2); // down-right
-    	if (checkValidity (pp, g)) validMoves.add(new Move(this,p,pp,null));
+	m = getMoveWithCapture(p,pp,g);
+	if (m != null) validMoves.add(m);
 
     	pp = new Point (p.x - 1, p.y - 2); // down-left
-    	if (checkValidity (pp, g)) validMoves.add(new Move(this,p,pp,null));
+	m = getMoveWithCapture(p,pp,g);
+	if (m != null) validMoves.add(m);
     	
     	return validMoves;
     }

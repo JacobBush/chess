@@ -11,17 +11,12 @@ public class King extends Piece {
     	List<Move> validMoves = new ArrayList<Move>();
 	ArrayList<Move> sideEffects;
     	for (int x = -1; x <= 1; x ++) {
-    		for (int y = -1; y <= 1; y++) {
-    			if (x == 0 && y == 0) continue;
-    			Point pp = new Point(p.x + x, p.y + y);
-    			Piece piece = g.getPieceAt(pp);
-			if (isEnemy(piece)) {
-			    sideEffects = new ArrayList<Move>();
-			    sideEffects.add(new Move(piece, pp, null, null));
-			    validMoves.add(new Move(this,p,pp,sideEffects));
-			}
-    			if (isEmpty(piece)) validMoves.add(new Move(this,p,pp,null));
-    		}
+    	    for (int y = -1; y <= 1; y++) {
+    		if (x == 0 && y == 0) continue;
+    		Point pp = new Point(p.x + x, p.y + y);
+		Move m = getMoveWithCapture(p,pp,g);
+		if (m != null) validMoves.add(m);
+    	    }
     	}
 	// Castling
 	// Need : king hasn't moved

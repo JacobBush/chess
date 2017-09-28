@@ -13,24 +13,20 @@ public class Pawn extends Piece {
         int homeRow = direction == 1 ? 1 : 6;
 
         Point pp = new Point(p.x, p.y + direction);
-        if (isEmpty(g.getPieceAt(pp))) validMoves.add(new Move (this,p,pp,null));
+        if (isEmpty(g.getPieceAt(pp))) 
+	    validMoves.add(new Move (this,p,pp,null));
 
         pp = new Point(p.x, p.y + 2*direction);
-        if (p.y == homeRow && isEmpty(g.getPieceAt(pp))) validMoves.add(new Move(this,p,pp,null));
-
-        ArrayList<Move> sideEffects;
+        if (p.y == homeRow && isEmpty(g.getPieceAt(pp)))
+	     validMoves.add(new Move(this,p,pp,null));
 
         pp = new Point (p.x - 1, p.y + direction);
-	sideEffects = new ArrayList<Move>();
-        sideEffects.add(new Move(g.getPieceAt(pp), pp, null, null)); // Piece is captured and moved off board
-	Piece piece = g.getPieceAt(pp);
-	if (isEnemy(g.getPieceAt(pp))) validMoves.add(new Move(this,p,pp,sideEffects));
+	Move ml = getMoveWithCapture(p,pp,g);
+	if (ml != null) validMoves.add(ml);
     	
 	pp = new Point (p.x + 1, p.y + direction);
-	sideEffects = new ArrayList<Move>();
-	sideEffects.add(new Move(g.getPieceAt(pp), pp, null, null));
-	piece = g.getPieceAt(pp);
-	if (isEnemy(g.getPieceAt(pp))) validMoves.add(new Move(this,p,pp,sideEffects));
+	Move mr = getMoveWithCapture(p,pp,g);
+	if (mr != null) validMoves.add(mr);
 		
     	return validMoves;
     }

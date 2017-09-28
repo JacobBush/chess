@@ -1,5 +1,6 @@
 import java.awt.Point;
 import java.util.List;
+import java.util.ArrayList;
 
 public abstract class Piece {
 	// Types
@@ -52,7 +53,7 @@ public abstract class Piece {
     	List<Move> validMoves = this.getValidMoves(start, g);
     	if (validMoves == null) return null;
 	for (Move m : validMoves) {
-	    if (m.getEndLoc().equals(end)) {
+	    if (m != null && m.getEndLoc().equals(end)) {
 		return m;
 	    }
 	}
@@ -88,6 +89,18 @@ public abstract class Piece {
 			return isAlly(piece) || isEnemy(piece);
     	}
     	return false;
+    }
+
+    // Helper for adding a move
+    protected Move getMoveWithCapture(Point start, Point end, Game g) {
+	if (!checkValidity(end, g)) return null;
+	Piece endPiece = g.getPieceAt(end);
+	List<Move> sideEffects = null;
+	if (isEnemy(endPiece)) {
+	    sideEffects = new ArrayList<Move>();
+	    sideEffects.add(new Move(endPiece, end, null, null));
+	}
+	return new Move(this, start, end, sideEffects);
     }
     
     // Abstract Methods
