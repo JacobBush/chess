@@ -40,6 +40,24 @@ public class King extends Piece {
 	//	Rook hasn't moved
 	//	There are no pieces between king and rook
 	//	** king isn't in check (move through check?
+	if (this.hasMoved()) return null;
+	int x = loc.x;
+	int y = loc.y;
+	Point p = new Point(x + dir, y);
+	while (Game.validPoint(p)) {
+	    Piece piece = g.getPieceAt(p);
+	    if (piece == null) {
+		p.translate(dir, 0);
+		continue;
+	    }
+	    if (piece instanceof Rook && isAlly(piece) && !piece.hasMoved()) {
+		// is an allied rook that hasn't moved
+		List<Move> sideEffects = new ArrayList<Move>();
+		sideEffects.add(new Move(piece, p, new Point(x + dir, y), true, null));
+		return new Move(this, loc, new Point(x+2*dir, y), true, sideEffects);
+	    }
+	    return null; // not an allied rook, or has moved
+	}	
 	return null;
     }
     
