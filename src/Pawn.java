@@ -14,11 +14,11 @@ public class Pawn extends Piece {
 
         Point pp = new Point(p.x, p.y + direction); // Move forward
         if (isEmpty(g.getPieceAt(pp))) 
-	    validMoves.add(new Move (this,p,pp,null));
+	    validMoves.add(new Move (this,p,pp,p.y==homeRow,null));
 
         pp = new Point(p.x, p.y + 2*direction); // Move forward 2
         if (p.y == homeRow && isEmpty(g.getPieceAt(pp)))
-	     validMoves.add(new Move(this,p,pp,null));
+	     validMoves.add(new Move(this,p,pp,true,null));
 
 	// Here is the check for en-passant
 	Move lastMove = g.getLastMove();
@@ -30,8 +30,8 @@ public class Pawn extends Piece {
 	    if (enemStart.equals(lastMove.getStartLoc()) && enemEnd.equals(lastMove.getEndLoc())) {
 	    	// We are able to en-passant
 	    	List<Move> sideEffects = new ArrayList<Move>();
-		sideEffects.add(new Move(lastMove.getPiece(), lastMove.getEndLoc(), null, null));
-		validMoves.add(new Move(this, p, new Point (p.x-1, p.y+direction), sideEffects));
+		sideEffects.add(new Move(lastMove.getPiece(), lastMove.getEndLoc(), null,lastMove.getPiece().hasMoved(), null));
+		validMoves.add(new Move(this, p, new Point (p.x-1, p.y+direction),!this.hasMoved(), sideEffects));
 	    }
 
 	    enemEnd = new Point (p.x+1, p.y); // to our right
@@ -39,8 +39,8 @@ public class Pawn extends Piece {
 	    if (enemStart.equals(lastMove.getStartLoc()) && enemEnd.equals(lastMove.getEndLoc())) {
 	    	// We are able to en-passant
 		List<Move> sideEffects = new ArrayList<Move>();
-		sideEffects.add(new Move(lastMove.getPiece(), lastMove.getEndLoc(), null, null));
-		validMoves.add(new Move(this, p, new Point (p.x+1, p.y+direction), sideEffects));
+		sideEffects.add(new Move(lastMove.getPiece(), lastMove.getEndLoc(), null,lastMove.getPiece().hasMoved(), null));
+		validMoves.add(new Move(this, p, new Point (p.x+1, p.y+direction),!this.hasMoved(), sideEffects));
 	    }
 	}
 	

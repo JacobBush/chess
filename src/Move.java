@@ -7,8 +7,9 @@ public class Move {
     private Point startLoc;
     private Point endLoc;
     private List<Move> sideEffects;
+    private boolean firstTimePieceMoved;
 
-    public Move (Piece piece, Point startLoc, Point endLoc, List<Move> sideEffects) {
+    public Move (Piece piece, Point startLoc, Point endLoc, boolean firstTimePieceMoved, List<Move> sideEffects) {
         // piece : Piece that is being moved
 	// startLoc : starting location
 	// endLoc : ending location (if null, piece will be removed)
@@ -16,6 +17,7 @@ public class Move {
 	this.piece = piece;
 	this.startLoc = startLoc;
 	this.endLoc = endLoc;
+	this.firstTimePieceMoved = firstTimePieceMoved;
 	this.sideEffects = sideEffects;
     }
 
@@ -23,5 +25,6 @@ public class Move {
     public Piece getPiece () {return piece;}
     public Point getStartLoc () {return startLoc;}
     public Point getEndLoc () {return endLoc;}
+    public boolean isFirstMove() {return firstTimePieceMoved;} 
     public List<Move> getSideEffects () {return sideEffects;}
 }

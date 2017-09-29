@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 public class King extends Piece {	
 	
+    // Constants for castling
+    private static int RIGHT = 1;
+    private static int LEFT = -1;
+
     public King (Piece.Color color) {
     	super(color, Piece.Type.KING);
     }
@@ -18,38 +22,24 @@ public class King extends Piece {
 		if (m != null) validMoves.add(m);
     	    }
     	}
+	
 	// Castling
-	// Need : king hasn't moved
-	// 	  rook hasn't moved
-	//        there's clear space
-	if (getCastle(p, -1, g) != null) {
-	    //Possible to castle to the left
-	    System.out.println("castleleft");
-	}
-	if (getCastle(p, 1, g) != null) {
-	    // Possible to castle to the right
-	    System.out.println("castleright");
-	}
+	Move m = getCastle(p, RIGHT,g);
+	if (m!=null) validMoves.add(m);
+
+	m = getCastle(p, LEFT, g);
+	if (m!= null) validMoves.add(m);
+
     	return validMoves;
     }
 
-    private Move getCastle(Point posn, int direction, Game game) {
-	if (!game.hasMoved(this)) {
-	    Point p = new Point(posn.x + direction, posn.y);
-	    while (game.validPoint(p)) {
-		Piece piece = game.getPieceAt(p);
-		if (piece == null) {
-		    p.translate(direction, 0);
-		    continue;
-		} else if (piece instanceof Rook) {
-		    if (!game.hasMoved(piece)) {
-			// rook hasn't moved
-		    }
-		} else {
-		    return null;
-		}
-	    }
-	}
+    private Move getCastle(Point loc, int dir, Game g) {
+	//TODO: Castling
+	// To castle we need:
+	//	King hasn't moved
+	//	Rook hasn't moved
+	//	There are no pieces between king and rook
+	//	** king isn't in check (move through check?
 	return null;
     }
     

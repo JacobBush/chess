@@ -2,7 +2,6 @@ import java.awt.Point;
 import java.util.Observable;
 import java.util.Stack;
 import java.util.List;
-import java.util.HashSet;
 
 // Implements the model
 public class Game extends Observable {
@@ -14,7 +13,6 @@ public class Game extends Observable {
     private Piece.Color turn;
     private Stack<Move> undoStack;
     private Stack<Move> redoStack;
-    private HashSet<Piece> movedPieces; // used for castling
 	
 	// Constructor
     public Game () {
@@ -27,14 +25,12 @@ public class Game extends Observable {
     	turn = Piece.Color.WHITE;
     	this.undoStack = new Stack<Move>();
     	this.redoStack = new Stack<Move>();
-	this.movedPieces = new HashSet<Piece>();
     	setChanged();
     	notifyObservers();
     }
     
     public void movePiece (Point startingLocation, Point endingLocation) {
     	// TODO:
-    	//    -En-passant
     	//    -Castling
     	//    -Check/mate
     	//    -Pawn Promotion
@@ -70,12 +66,12 @@ public class Game extends Observable {
 	    }
 	    // Move the piece
 	    Piece p = m.getPiece();
-	    if (m.getStartLoc() != null)
-    		board[m.getStartLoc().x][m.getStartLoc().y] = null;
+    	    if (m.getStartLoc() != null)
+		board[m.getStartLoc().x][m.getStartLoc().y] = null;
     	    if (m.getEndLoc() != null)
 		board[m.getEndLoc().x][m.getEndLoc().y] = p;
-	    // TODO: This won't work with undo - will need to be fixed
-	    movedPieces.add(p);
+	    // For castling : keep track of if has moved
+	    p.setHasMoved();
     	    setChanged();
 	    return true;
     	}
@@ -91,7 +87,8 @@ public class Game extends Observable {
 		board[m.getEndLoc().x][m.getEndLoc().y] = null;
     	    if (m.getStartLoc() != null)
 		board[m.getStartLoc().x][m.getStartLoc().y] = p;
-
+	    // For castling : keep track of if has moved
+	    if (m.isFirstMove()) p.resetHasMoved();
 	    // revert side effects
 	    List<Move> se = m.getSideEffects();
 	    if (se != null) {
@@ -103,10 +100,6 @@ public class Game extends Observable {
 	return false;
     }
 
-    public boolean hasMoved (Piece p) {
-	return movedPieces.contains(p);
-    }
-    
     public boolean movablePiece (Point location) {
     	if (location == null) return false;
     	Piece p = board[location.x][location.y];

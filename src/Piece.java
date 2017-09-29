@@ -21,11 +21,13 @@ public abstract class Piece {
 	// Private Fields
 	private final Color color;
 	private final Type type;
+	private boolean hasMoved;
 	
 	// Constructor
 	public Piece (Color color, Type type) {
 		this.color = color;
 		this.type = type;
+		this.hasMoved = false;
 	}
 	
 	// getters
@@ -59,6 +61,10 @@ public abstract class Piece {
 	}
     	return null;
     }
+
+    public boolean hasMoved() {return hasMoved;}
+    public void setHasMoved() {this.hasMoved = true;}
+    public void resetHasMoved() {this.hasMoved = false;} 
     
     // Helper methods
     
@@ -98,9 +104,9 @@ public abstract class Piece {
 	List<Move> sideEffects = null;
 	if (isEnemy(endPiece)) {
 	    sideEffects = new ArrayList<Move>();
-	    sideEffects.add(new Move(endPiece, end, null, null));
+	    sideEffects.add(new Move(endPiece, end, null,!endPiece.hasMoved(), null));
 	}
-	return new Move(this, start, end, sideEffects);
+	return new Move(this, start, end, !this.hasMoved(), sideEffects);
     }
     
     // Abstract Methods
