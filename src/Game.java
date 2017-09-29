@@ -141,6 +141,11 @@ public class Game extends Observable {
 	    this.notifyObservers();
 	}
     }
+
+    public Move getLastMove () {
+	// Will return top of undo stack
+	return undoStack.empty() ? null : undoStack.peek();
+    }
     
     private void clearStack(Stack s) {
     	while (!s.empty()) s.pop();
