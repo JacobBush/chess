@@ -62,6 +62,14 @@ public abstract class Piece {
     	return null;
     }
 
+    public List<Point> getAttackedSquares (Point p, Game g) {
+	List<Point> squares = new ArrayList<Point>();
+	for (Move m : getValidMoves(p,g)) {
+	    squares.add(m.getEndLoc());
+	}
+	return squares;
+    }
+
     public boolean hasMoved() {return hasMoved;}
     public void setHasMoved() {this.hasMoved = true;}
     public void resetHasMoved() {this.hasMoved = false;} 

@@ -62,6 +62,17 @@ public class Pawn extends Piece {
 		
     	return validMoves;
     }
+
+    @Override 
+    public List<Point> getAttackedSquares (Point p, Game g) {
+	List<Point> squares = new ArrayList<Point>();	
+        int direction = this.getColor() == Piece.Color.BLACK ? -1 : 1;
+	Point loc = new Point (p.x + 1, p.y + direction);
+	if (Game.validPoint(loc)) squares.add(loc);
+	loc = new Point (p.x - 1, p.y + direction);
+	if (Game.validPoint(loc)) squares.add(loc);
+	return squares;
+    }
     
     // usability
     @Override

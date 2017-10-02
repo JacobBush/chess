@@ -10,6 +10,7 @@
   <target name="compile"
 		description="compile the source">
     <!-- Compile the java code from ${src} into ${dest} -->
+    <mkdir dir="${dest}" />
     <javac srcdir="${src}" destdir="${dest}" includeAntRuntime="false"/>
   </target>
 
