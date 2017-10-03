@@ -109,7 +109,7 @@ public class Game extends Observable {
     	return (p != null && p.getColor() == turn); 
     }
 
-    public boolean[][] getSquaresAttackedBy (Piece.Color player) {
+    private boolean[][] getSquaresAttackedBy (Piece.Color player, Piece[][] board) {
 	// Will get all the squares that pieces belonging to
 	// the passed player can attack. (not where they can move - pawns)
 	// Will return a 2D array of booleans of size BOARD_SIZE squared,
@@ -118,10 +118,9 @@ public class Game extends Observable {
 	for (int x = 0; x < BOARD_SIZE; x ++) {
 	    for (int y=0; y < BOARD_SIZE; y++) {
 		// For each square check if piece is of player's color
-		Point loc = new Point (x,y);
-		Piece p = getPieceAt(loc);
+		Piece p = board[x][y]; // always will be valid index
 		if (p == null || p.getColor() != player) continue;
-	    	for (Point attack : p.getAttackedSquares(loc, this)) {
+	    	for (Point attack : p.getAttackedSquares(new Point(x,y), board)) {
 		    squares[attack.x][attack.y] = true;
 		}
 	    }
@@ -129,12 +128,12 @@ public class Game extends Observable {
 	return squares;
     }
 
-    public boolean isAttackedBy (Point p, Piece.Color player) {
-	boolean[][] attackedSquares = getSquaresAttackedBy(player);
+    private boolean isAttackedBy (Point p, Piece.Color player, Piece[][] board) {
+	boolean[][] attackedSquares = getSquaresAttackedBy(player, board);
 	return attackedSquares[p.x][p.y];
     }
 
-    private Point getKingPosn(Piece.Color player) {
+    private Point getKingPosn(Piece.Color player, Piece[][] board){
 	for (int x = 0; x < BOARD_SIZE; x++) {
 	    for (int y = 0; y < BOARD_SIZE; y++) {
 		Piece p = board[x][y];
@@ -149,11 +148,16 @@ public class Game extends Observable {
     }
 
     public boolean isChecked (Piece.Color player) {
+	return isChecked(player, this.getBoard());
+    }
+
+    public boolean isChecked (Piece.Color player, Piece[][] board) {	
 	// Will return true if player is in check
-	Point kingPosn = getKingPosn(player);
-	// kingPosn only null if there is no king - will throw nullpointerexception
+	Point kingPosn = getKingPosn(player,board);
+	// kingPosn only null if there is no king - will not throw currently.
+	if (kingPosn == null) return false;
 	Piece.Color oppColor = player == Piece.Color.WHITE ? Piece.Color.BLACK : Piece.Color.WHITE;
-	return isAttackedBy(kingPosn, oppColor);
+	return isAttackedBy(kingPosn, oppColor, board);
     }
     
     // Undo / Redo
