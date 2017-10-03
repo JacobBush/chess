@@ -63,12 +63,14 @@ public abstract class Piece {
     }
 
     public List<Point> getAttackedSquares (Point p, Game g) {
-	List<Point> squares = new ArrayList<Point>();
-	for (Move m : getValidMoves(p,g)) {
-	    squares.add(m.getEndLoc());
-	}
-	return squares;
+	//List<Point> squares = new ArrayList<Point>();
+	//for (Move m : getValidMoves(p,g)) {
+	//    squares.add(m.getEndLoc());
+	//}
+	//return squares;
+	return getAttackedSquares(p, g.getBoard());
     }
+
 
     public boolean hasMoved() {return hasMoved;}
     public void setHasMoved() {this.hasMoved = true;}
@@ -104,6 +106,23 @@ public abstract class Piece {
     	}
     	return false;
     }
+   
+    // helpers for getAttackedSquares 
+    protected boolean checkValidity (Point p, Piece[][] board) {
+    	if (Game.validPoint (p)) {
+			Piece piece = board[p.x][p.y];
+			return isEmpty(piece) || isEnemy(piece);
+    	}
+    	return false;
+    }
+    
+    protected boolean checkBreak (Point p, Piece[][] board) {
+    	if (Game.validPoint (p)) {
+    		Piece piece = board[p.x][p.y];
+			return isAlly(piece) || isEnemy(piece);
+    	}
+    	return false;
+    }
 
     // Helper for adding a move
     protected Move getMoveWithCapture(Point start, Point end, Game g) {
@@ -119,5 +138,6 @@ public abstract class Piece {
     
     // Abstract Methods
     public abstract List<Move> getValidMoves(Point p, Game g); // returns all valid points for piece at Point p in Game g
+    public abstract List<Point> getAttackedSquares (Point p, Piece[][] board); // returns all attacked squares
     
 }

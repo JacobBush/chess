@@ -35,6 +35,32 @@ public class Bishop extends Piece {
     	return validMoves;
     }
     
+    public List<Point> getAttackedSquares (Point p, Piece[][] board) {
+    	List<Point> squares = new ArrayList<Point>();
+
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // up-right
+    		Point pp = new Point(p.x + i, p.y + i);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // down-right
+    		Point pp = new Point(p.x + i, p.y - i);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // up-left
+    		Point pp = new Point(p.x - i, p.y + i);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // down-left
+    		Point pp = new Point(p.x - i, p.y - i);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+	return squares;
+    }    
+
     // usability
     @Override
     public String toString () {

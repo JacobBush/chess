@@ -46,6 +46,36 @@ public class Knight extends Piece {
     	return validMoves;
     }
     
+    public List<Point> getAttackedSquares (Point p, Piece[][] board) {
+	List<Point> squares = new ArrayList<Point>();	
+    	
+	Point pp = new Point (p.x + 2, p.y + 1); // right-up
+	if (Game.validPoint(pp)) squares.add(pp);
+
+    	pp = new Point (p.x + 2, p.y - 1); // right-down
+	if (Game.validPoint(pp)) squares.add(pp);
+
+    	pp = new Point (p.x - 2, p.y + 1); // left-up
+	if (Game.validPoint(pp)) squares.add(pp);
+
+    	pp = new Point (p.x - 2, p.y - 1); // left-down
+	if (Game.validPoint(pp)) squares.add(pp);
+    	
+    	pp = new Point (p.x + 1, p.y + 2); // up-right
+	if (Game.validPoint(pp)) squares.add(pp);
+
+    	pp = new Point (p.x - 1, p.y + 2); // up-left
+	if (Game.validPoint(pp)) squares.add(pp);
+
+    	pp = new Point (p.x + 1, p.y - 2); // down-right
+	if (Game.validPoint(pp)) squares.add(pp);
+
+    	pp = new Point (p.x - 1, p.y - 2); // down-left
+	if (Game.validPoint(pp)) squares.add(pp);
+	
+	return squares;
+    }
+
     // usability
     @Override
     public String toString () {

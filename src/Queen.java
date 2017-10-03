@@ -58,6 +58,56 @@ public class Queen extends Piece {
     	return validMoves;
     }
     
+    public List<Point> getAttackedSquares (Point p, Piece[][] board) {
+    	List<Point> squares = new ArrayList<Point>();
+
+	// From Rook	
+    	for (int y = p.y + 1; y < Game.BOARD_SIZE; y ++) { // up
+    		Point pp = new Point(p.x, y);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int y = p.y - 1; y >= 0; y --) { // down
+    		Point pp = new Point(p.x, y);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int x = p.x + 1; x < Game.BOARD_SIZE; x ++) { // right
+    		Point pp = new Point(x, p.y);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int x = p.x - 1; x >= 0; x --) { // left
+    		Point pp = new Point(x, p.y);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+
+	// From Bishop
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // up-right
+    		Point pp = new Point(p.x + i, p.y + i);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // down-right
+    		Point pp = new Point(p.x + i, p.y - i);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // up-left
+    		Point pp = new Point(p.x - i, p.y + i);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+    	for (int i = 1; i < Game.BOARD_SIZE; i ++) { // down-left
+    		Point pp = new Point(p.x - i, p.y - i);
+		if (Game.validPoint(pp)) squares.add(pp);
+		if (checkBreak(pp, board)) break;
+    	}
+
+	return squares;
+    }
+    
     // usability
     @Override
     public String toString () {

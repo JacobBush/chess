@@ -61,8 +61,7 @@ public class King extends Piece {
 	return null;
     }
 
-    @Override 
-    public List<Point> getAttackedSquares (Point p, Game g) {
+    public List<Point> getAttackedSquares (Point p, Piece[][] board) {
 	List<Point> squares = new ArrayList<Point>();
     	for (int x = -1; x <= 1; x ++) {
     	    for (int y = -1; y <= 1; y++) {
