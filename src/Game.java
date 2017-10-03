@@ -13,6 +13,7 @@ public class Game extends Observable {
     private Piece.Color turn;
     private Stack<Move> undoStack;
     private Stack<Move> redoStack;
+    private Piece.Color victor;
 	
 	// Constructor
     public Game () {
@@ -22,6 +23,7 @@ public class Game extends Observable {
     // Public API
     public void resetGame() {
     	initializeBoard();
+	victor = null; // Set to winning color if a player wins
     	turn = Piece.Color.WHITE;
     	this.undoStack = new Stack<Move>();
     	this.redoStack = new Stack<Move>();
@@ -31,22 +33,32 @@ public class Game extends Observable {
     
     public void movePiece (Point startingLocation, Point endingLocation) {
     	// TODO:
-    	//    -Castling
     	//    -Check/mate
     	//    -Pawn Promotion
-    	
-
+    	// check on castle
+	
+	if (victor != null) return; // Don't move if player has won
+	
     	if (validPoint(startingLocation) && validPoint(endingLocation)) {
     		Piece p = board[startingLocation.x][startingLocation.y];
     		if (isTurnOf(p)) {
 		    Move m = p.getMove(startingLocation, endingLocation, this);
 		    if (m != null) {
 			if (executeMove(m)) {
-			    undoStack.push(m);
-			    clearStack(redoStack);
-			    changeTurn();
-			    if (isChecked(Piece.Color.WHITE)) System.out.println("Player white is in check.");
-			    if (isChecked(Piece.Color.BLACK)) System.out.println("Player black is in check.");
+	    		    if (isChecked(turn)) {
+				// Player moved and is still in check - not allowed
+				revertMove(m);
+				clearChanged();
+	    		    } else {
+				// Update undo and change turn
+			    	undoStack.push(m);
+			    	clearStack(redoStack);
+			    	changeTurn();
+				if (isCheckMate(turn)) {
+					// Current Player Loses
+					victor = turn == Piece.Color.WHITE ? Piece.Color.BLACK : Piece.Color.WHITE;
+				}
+			    }
 			}
 		    }
         	} else {
@@ -72,6 +84,7 @@ public class Game extends Observable {
 		board[m.getStartLoc().x][m.getStartLoc().y] = null;
     	    if (m.getEndLoc() != null)
 		board[m.getEndLoc().x][m.getEndLoc().y] = p;
+	    
 	    // For castling : keep track of if has moved
 	    p.setHasMoved();
     	    setChanged();
@@ -104,6 +117,7 @@ public class Game extends Observable {
 
     public boolean movablePiece (Point location) {
     	if (location == null) return false;
+	if (victor != null) return false; // Cant move if player has won
     	Piece p = board[location.x][location.y];
     	// TODO: Add checks for check and the like
     	return (p != null && p.getColor() == turn); 
@@ -159,6 +173,27 @@ public class Game extends Observable {
 	Piece.Color oppColor = player == Piece.Color.WHITE ? Piece.Color.BLACK : Piece.Color.WHITE;
 	return isAttackedBy(kingPosn, oppColor, board);
     }
+
+    public boolean isCheckMate (Piece.Color player) {
+	if (isChecked(player, this.getBoard())) {
+	    if (kingCanMove(player) || pieceCanCapture(player) || pieceCanBlock(player)) {
+		return true;
+	    }
+	    return false;
+	}
+	return false;
+    }
+
+    // 3 subproblems for checkmate
+    private boolean kingCanMove(Piece.Color player) {
+	return false;
+    }
+    private boolean pieceCanCapture(Piece.Color player) {
+	return false;
+    }
+    private boolean pieceCanBlock(Piece.Color player) {
+	return false;
+    }
     
     // Undo / Redo
     
@@ -168,6 +203,7 @@ public class Game extends Observable {
 	    if (this.revertMove(m)) {
 		this.redoStack.push(m);
 		changeTurn();
+	    	if (victor != null) victor = null; // Player has no longer won
 	    } else {
 	        this.undoStack.push(m);
 	    }
@@ -181,6 +217,10 @@ public class Game extends Observable {
 	    if (this.executeMove(m)) {
 		this.undoStack.push(m);
 		changeTurn();
+		if (isCheckMate(turn)) {
+		    // Current Player Loses
+		    victor = turn == Piece.Color.WHITE ? Piece.Color.BLACK : Piece.Color.WHITE;
+		}
 	    } else {
 		this.redoStack.push(m);
 	    }
