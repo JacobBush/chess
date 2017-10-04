@@ -50,6 +50,7 @@ public class ImageManager {
 			wq = ImageIO.read(new File("img/white_queen.png"));
 			wk = ImageIO.read(new File("img/white_king.png"));
 		} catch (IOException e) {
+		    System.out.println(e);
 		}
 		
 		BLACK_PAWN = bp;
