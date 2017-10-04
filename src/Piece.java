@@ -77,7 +77,9 @@ public abstract class Piece {
     public void resetHasMoved() {this.hasMoved = false;} 
     
     // Helper methods
-    
+   
+    public static Color getEnemy (Color c) {return c == Color.WHITE ? Color.BLACK : Color.WHITE;}
+ 
     public boolean isEnemy (Piece p) {
     	return (!isEmpty(p) && p.getColor() != this.getColor());
     }

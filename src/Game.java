@@ -2,6 +2,7 @@ import java.awt.Point;
 import java.util.Observable;
 import java.util.Stack;
 import java.util.List;
+import java.util.ArrayList;
 
 // Implements the model
 public class Game extends Observable {
@@ -56,7 +57,7 @@ public class Game extends Observable {
 			    	changeTurn();
 				if (isCheckMate(turn)) {
 					// Current Player Loses
-					victor = turn == Piece.Color.WHITE ? Piece.Color.BLACK : Piece.Color.WHITE;
+					victor = Piece.getEnemy(turn);
 				}
 			    }
 			}
@@ -170,29 +171,69 @@ public class Game extends Observable {
 	Point kingPosn = getKingPosn(player,board);
 	// kingPosn only null if there is no king - will not throw currently.
 	if (kingPosn == null) return false;
-	Piece.Color oppColor = player == Piece.Color.WHITE ? Piece.Color.BLACK : Piece.Color.WHITE;
+	Piece.Color oppColor = Piece.getEnemy(player);
 	return isAttackedBy(kingPosn, oppColor, board);
     }
 
     public boolean isCheckMate (Piece.Color player) {
-	if (isChecked(player, this.getBoard())) {
-	    if (kingCanMove(player) || pieceCanCapture(player) || pieceCanBlock(player)) {
-		return true;
+	Piece[][] b = this.getBoard();
+	Point p = getKingPosn (player, board);
+	Piece.Color oppCol = Piece.getEnemy(player);
+	if (isChecked(player, b)) {
+	    if (kingCanMove(p,oppCol,b) ||
+		pieceCanCaptureChecker(p,oppCol,b) ||
+		pieceCanBlockChecker(p,oppCol,b)) {
+		return false;
 	    }
-	    return false;
+	    return true;
 	}
 	return false;
     }
 
     // 3 subproblems for checkmate
-    private boolean kingCanMove(Piece.Color player) {
+    private boolean kingCanMove(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
+    	boolean[][] attackedSquares =  getSquaresAttackedBy (oppCol, board);
+	for (int x = -1; x <= 1; x++) {
+	    for (int y = -1; y <= 1; y++) {
+		if (x==0 && y==0) continue;
+		if (validPoint(kingPosn.x + x, kingPosn.y + y)) {
+		     if (attackedSquares[kingPosn.x + x][kingPosn.y + y]) return true;
+		}
+	    }
+	}
 	return false;
     }
-    private boolean pieceCanCapture(Piece.Color player) {
-	return false;
+
+    private boolean pieceCanCaptureChecker(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
+	List<Piece> piecesAttackingKing = getPiecesAttackingKing(kingPosn, oppCol, board);
+	// Know king is in check, so at least 1 piece checking king
+	// Could throw error as an error check
+	if (piecesAttackingKing.size() >= 2) return false;
+	// 1 piece is attacking king
+	// -> need to check if a piece can take the checker, and that we don't end in check
+	
+	return true;
     }
-    private boolean pieceCanBlock(Piece.Color player) {
-	return false;
+    private boolean pieceCanBlockChecker(Point kingPosn, Piece.Color player, Piece[][] board) {
+	return true;
+    }
+
+    private List<Piece> getPiecesAttackingKing(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
+	List<Piece> piecesAttackingKing = new ArrayList<Piece>();
+	for (int x = 0; x < BOARD_SIZE; x ++) {
+	    for (int y=0; y < BOARD_SIZE; y++) {
+		// For each square check if piece is of player's color
+		Piece p = board[x][y]; // always will be valid index
+		if (p == null || p.getColor() != oppCol) continue;
+	    	for (Point attack : p.getAttackedSquares(new Point(x,y), board)) {
+		    if (attack != null && attack.equals(kingPosn)) {
+			piecesAttackingKing.add(p);
+			break;
+		    }
+		}
+	    }
+	}
+	return piecesAttackingKing;
     }
     
     // Undo / Redo
@@ -219,7 +260,7 @@ public class Game extends Observable {
 		changeTurn();
 		if (isCheckMate(turn)) {
 		    // Current Player Loses
-		    victor = turn == Piece.Color.WHITE ? Piece.Color.BLACK : Piece.Color.WHITE;
+		    victor = Piece.getEnemy(turn);
 		}
 	    } else {
 		this.redoStack.push(m);
