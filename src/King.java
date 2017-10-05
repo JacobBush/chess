@@ -72,6 +72,9 @@ public class King extends Piece {
     	}
 	return squares;
     }
+
+    public List<Point> getAttackLine(Point start, Point end, Piece[][] board) {return null;}
+    public List<Point> getCapturablePieces (Point p, Piece[][] board) {return null;}
  
     // usability
     @Override

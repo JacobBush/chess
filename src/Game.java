@@ -205,29 +205,62 @@ public class Game extends Observable {
     }
 
     private boolean pieceCanCaptureChecker(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
-	List<Piece> piecesAttackingKing = getPiecesAttackingKing(kingPosn, oppCol, board);
+	List<Point> piecesAttackingKing = getPiecesAttackingKing(kingPosn, oppCol, board);
 	// Know king is in check, so at least 1 piece checking king
-	// Could throw error as an error check
+	// Could throw error as an error check if 0 pieces
 	if (piecesAttackingKing.size() >= 2) return false;
 	// 1 piece is attacking king
 	// -> need to check if a piece can take the checker, and that we don't end in check
-	
-	return true;
+	Point attackerPosn = piecesAttackingKing.get(0);// will throw if no piece checking the king
+	Piece attacker = board[attackerPosn.x][attackerPosn.y]; 
+	// For each of our pieces, see if we can move to attacker's posn
+	for (int x = 0; x < BOARD_SIZE; x++) {
+	    for (int y = 0; y < BOARD_SIZE; y++) {
+		Piece piece = board[x][y];
+		if (piece == null || piece.getColor() == oppCol) continue;
+		// Piece is one of ours
+		List<Point> capturablePieces = piece.getCapturablePieces(new Point(x,y), board); 
+	    	if (capturablePieces.contains(attackerPosn)) {
+		    // We can capture the attacker!
+		    return true;
+		    // TODO: check that we aren't in check after this capture
+		} else {
+		    continue; // we can't capture (could let fall through)
+		}
+	    }
+	}
+	return false;
     }
-    private boolean pieceCanBlockChecker(Point kingPosn, Piece.Color player, Piece[][] board) {
+    private boolean pieceCanBlockChecker(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
+	List<Point> piecesAttackingKing = getPiecesAttackingKing(kingPosn, oppCol, board);
+	if (piecesAttackingKing.size() >= 2) return false;
+	// need to check if a piece can block the attacker
+	Point attackerPosn = piecesAttackingKing.get(0);// will throw if no piece checking the king
+	Piece attacker = board[attackerPosn.x][attackerPosn.y]; 
+	List<Point> attackLine = attacker.getAttackLine(attackerPosn, kingPosn, board);
+	if (attackLine == null || attackLine.size() == 0) {
+		return false; // Malformed attackline - could throw
+	} else if (attackLine.size() == 1) {
+	    return false; // attacker attacks kingPosn directly 
+	} else {
+	    // There are squares to block!
+	    // TODO: Check that a piece can move to one of these squares
+	    // TODO: If it can, check that we aren't in check afterwards.
+	}
 	return true;
     }
 
-    private List<Piece> getPiecesAttackingKing(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
-	List<Piece> piecesAttackingKing = new ArrayList<Piece>();
+    private List<Point> getPiecesAttackingKing(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
+	List<Point> piecesAttackingKing = new ArrayList<Point>();
 	for (int x = 0; x < BOARD_SIZE; x ++) {
 	    for (int y=0; y < BOARD_SIZE; y++) {
 		// For each square check if piece is of player's color
 		Piece p = board[x][y]; // always will be valid index
+		Point pp = new Point(x,y);
 		if (p == null || p.getColor() != oppCol) continue;
-	    	for (Point attack : p.getAttackedSquares(new Point(x,y), board)) {
+	    	for (Point attack : p.getAttackedSquares(pp, board)) {
 		    if (attack != null && attack.equals(kingPosn)) {
-			piecesAttackingKing.add(p);
+			piecesAttackingKing.add(pp);
 			break;
 		    }
 		}

@@ -141,5 +141,8 @@ public abstract class Piece {
     // Abstract Methods
     public abstract List<Move> getValidMoves(Point p, Game g); // returns all valid points for piece at Point p in Game g
     public abstract List<Point> getAttackedSquares (Point p, Piece[][] board); // returns all attacked squares
-    
+    // return list of point to attack end from start    
+    public abstract List<Point> getAttackLine (Point start, Point end, Piece[][] board);
+    // Similar to get attacked squares, but will return location of all pieces that could be captured
+    public abstract List<Point> getCapturablePieces (Point p, Piece[][] board);
 }
