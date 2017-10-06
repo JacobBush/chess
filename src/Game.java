@@ -3,6 +3,8 @@ import java.util.Observable;
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 // Implements the model
 public class Game extends Observable {
@@ -15,6 +17,7 @@ public class Game extends Observable {
     private Stack<Move> undoStack;
     private Stack<Move> redoStack;
     private Piece.Color victor;
+    private Map<Piece, Boolean> hasMoved;
 	
 	// Constructor
     public Game () {
@@ -23,20 +26,20 @@ public class Game extends Observable {
     
     // Public API
     public void resetGame() {
-    	initializeBoard();
+	this.hasMoved = new HashMap<Piece, Boolean> ();
 	victor = null; // Set to winning color if a player wins
     	turn = Piece.Color.WHITE;
     	this.undoStack = new Stack<Move>();
     	this.redoStack = new Stack<Move>();
+    	initializeBoard();
     	setChanged();
     	notifyObservers();
     }
     
     public void movePiece (Point startingLocation, Point endingLocation) {
     	// TODO:
-    	//    -Check/mate
+    	//    -mate
     	//    -Pawn Promotion
-    	// check on castle
 	
 	if (victor != null) return; // Don't move if player has won
 	
@@ -45,13 +48,13 @@ public class Game extends Observable {
     		if (isTurnOf(p)) {
 		    Move m = p.getMove(startingLocation, endingLocation, this);
 		    if (m != null) {
-			if (executeMove(m)) {
+			if (executeMove(m, board)) {
 	    		    if (isChecked(turn)) {
 				// Player moved and is still in check - not allowed
-				revertMove(m);
-				clearChanged();
+				revertMove(m,board);
 	    		    } else {
 				// Update undo and change turn
+	    		        updateHasMoved(m,true);
 			    	undoStack.push(m);
 			    	clearStack(redoStack);
 			    	changeTurn();
@@ -60,6 +63,7 @@ public class Game extends Observable {
 					victor = Piece.getEnemy(turn);
 				}
 			    }
+			    setChanged();
 			}
 		    }
         	} else {
@@ -71,13 +75,14 @@ public class Game extends Observable {
     	notifyObservers();
     }
 
-    private boolean executeMove (Move m) {
+    private boolean executeMove (Move m, Piece[][] board) {
+	// NOTE : Will mutate the Piece[][] passed
 	// True if moved successful
 	if (m != null) { 
 	    // execute side effects
 	    List<Move> se = m.getSideEffects();
 	    if (se != null) {
-		for (Move move : se) executeMove(move);
+		for (Move move : se) executeMove(move, board);
 	    }
 	    // Move the piece
 	    Piece p = m.getPiece();
@@ -85,16 +90,13 @@ public class Game extends Observable {
 		board[m.getStartLoc().x][m.getStartLoc().y] = null;
     	    if (m.getEndLoc() != null)
 		board[m.getEndLoc().x][m.getEndLoc().y] = p;
-	    
-	    // For castling : keep track of if has moved
-	    p.setHasMoved();
-    	    setChanged();
 	    return true;
     	}
 	return false;
     }
 
-    private boolean revertMove (Move m) {
+    private boolean revertMove (Move m, Piece[][] board) {
+	// NOTE : Will mutate the Piece[][] passed
 	// True if moved successful
 	if (m!= null) {
 	    // Move the piece
@@ -103,17 +105,27 @@ public class Game extends Observable {
 		board[m.getEndLoc().x][m.getEndLoc().y] = null;
     	    if (m.getStartLoc() != null)
 		board[m.getStartLoc().x][m.getStartLoc().y] = p;
-	    // For castling : keep track of if has moved
-	    if (m.isFirstMove()) p.resetHasMoved();
 	    // revert side effects
 	    List<Move> se = m.getSideEffects();
 	    if (se != null) {
-		for (Move move : se) revertMove(move);
+		for (Move move : se) revertMove(move, board);
 	    }
-    	    setChanged();
 	    return true;
 	}
 	return false;
+    }
+
+    private void updateHasMoved (Move m, boolean moveDo) {
+	// moveDo will be false if the move is being undone
+	if (m == null) return;
+	if (moveDo) {
+	    hasMoved.put(m.getPiece(), Boolean.TRUE);
+	} else {
+	    if (m.isFirstMove()) hasMoved.put(m.getPiece(), Boolean.FALSE);	
+	}
+	if (m.getSideEffects() != null) {    
+	    for (Move side : m.getSideEffects()) updateHasMoved(side, moveDo);
+	}
     }
 
     public boolean movablePiece (Point location) {
@@ -129,6 +141,7 @@ public class Game extends Observable {
 	// the passed player can attack. (not where they can move - pawns)
 	// Will return a 2D array of booleans of size BOARD_SIZE squared,
 	// where each entry will be true if attackable, and false otherwise
+	// NOTE : Will not mutate board
 	boolean[][] squares = new boolean[BOARD_SIZE][BOARD_SIZE];
 	for (int x = 0; x < BOARD_SIZE; x ++) {
 	    for (int y=0; y < BOARD_SIZE; y++) {
@@ -144,8 +157,13 @@ public class Game extends Observable {
     }
 
     private boolean isAttackedBy (Point p, Piece.Color player, Piece[][] board) {
+	// NOTE : Will not mutate board
 	boolean[][] attackedSquares = getSquaresAttackedBy(player, board);
 	return attackedSquares[p.x][p.y];
+    }
+
+    public boolean isAttackedBy (Point p, Piece.Color player) {
+	return isAttackedBy(p, player, board); // assuming that will not be mutated
     }
 
     private Point getKingPosn(Piece.Color player, Piece[][] board){
@@ -176,11 +194,11 @@ public class Game extends Observable {
     }
 
     public boolean isCheckMate (Piece.Color player) {
-	Piece[][] b = this.getBoard();
 	Point p = getKingPosn (player, board);
 	Piece.Color oppCol = Piece.getEnemy(player);
+	Piece[][] b = this.getBoard();
 	if (isChecked(player, b)) {
-	    if (kingCanMove(p,oppCol,b) ||
+	    if (kingCanMove(p,oppCol,b) || 
 		pieceCanCaptureChecker(p,oppCol,b) ||
 		pieceCanBlockChecker(p,oppCol,b)) {
 		return false;
@@ -196,9 +214,11 @@ public class Game extends Observable {
 	for (int x = -1; x <= 1; x++) {
 	    for (int y = -1; y <= 1; y++) {
 		if (x==0 && y==0) continue;
-		if (validPoint(kingPosn.x + x, kingPosn.y + y)) {
-		     if (attackedSquares[kingPosn.x + x][kingPosn.y + y]) return true;
-		}
+		Point p = new Point (kingPosn.x + x, kingPosn.y + y);
+		if (!validPoint(p)) continue;
+		Piece piece = board[p.x][p.y];
+		if (piece != null && piece.getColor() != oppCol) continue; 
+		if (!attackedSquares[p.x][p.y]) return true;
 	    }
 	}
 	return false;
@@ -219,14 +239,22 @@ public class Game extends Observable {
 		Piece piece = board[x][y];
 		if (piece == null || piece.getColor() == oppCol) continue;
 		// Piece is one of ours
-		List<Point> capturablePieces = piece.getCapturablePieces(new Point(x,y), board); 
-	    	if (capturablePieces.contains(attackerPosn)) {
+		Point piecePosn = new Point(x,y);
+		List<Point> capturablePieces = piece.getCapturablePieces(piecePosn, board);
+	    	if (capturablePieces != null && capturablePieces.contains(attackerPosn)) {
 		    // We can capture the attacker!
-		    return true;
-		    // TODO: check that we aren't in check after this capture
-		} else {
-		    continue; // we can't capture (could let fall through)
-		}
+		    Move m = piece.getCapture(piecePosn, attackerPosn, this); // get the move to capture this piece
+    		    if (executeMove (m, board)) {
+			// Check to see that we wouldn't be in check
+			if (!isChecked(piece.getColor(), board)) {
+			    // This is a valid capture
+			    return true;
+			} else {
+                            // We are in check after this capture -- not valid
+			    revertMove(m, board);
+                        }
+		    } else continue; // we couldn't execute the move
+		} else  continue; // we can't capture
 	    }
 	}
 	return false;
@@ -274,10 +302,12 @@ public class Game extends Observable {
     public void undo () {
 	if (!undoStack.empty()) {
 	    Move m = undoStack.pop();
-	    if (this.revertMove(m)) {
+	    if (this.revertMove(m, board)) {
+	    	updateHasMoved(m,false);
 		this.redoStack.push(m);
 		changeTurn();
 	    	if (victor != null) victor = null; // Player has no longer won
+		setChanged();
 	    } else {
 	        this.undoStack.push(m);
 	    }
@@ -288,14 +318,16 @@ public class Game extends Observable {
     public void redo () {
     	if (!redoStack.empty()) {
 	    Move m = redoStack.pop();
-	    if (this.executeMove(m)) {
+	    if (this.executeMove(m,board)) {
+	        updateHasMoved(m,true);
 		this.undoStack.push(m);
 		changeTurn();
 		if (isCheckMate(turn)) {
 		    // Current Player Loses
 		    victor = Piece.getEnemy(turn);
 		}
-	    } else {
+		setChanged();
+	    } else { 
 		this.redoStack.push(m);
 	    }
 	    this.notifyObservers();
@@ -310,6 +342,8 @@ public class Game extends Observable {
     private void clearStack(Stack s) {
     	while (!s.empty()) s.pop();
     }
+
+    public boolean hasMoved(Piece p) {return hasMoved.get(p).booleanValue();}
     
     // Getters
     public Piece getPieceAt(Point p) {
@@ -395,7 +429,9 @@ public class Game extends Observable {
     	default:
     		break;
     	}
-    	board[x][y] = p;
+    	this.board[x][y] = p;
+	// Add piece to hasMoved map
+	this.hasMoved.put(p, false);
     }
     
     private void changeTurn() {

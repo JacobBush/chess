@@ -21,13 +21,13 @@ public abstract class Piece {
 	// Private Fields
 	private final Color color;
 	private final Type type;
-	private boolean hasMoved;
+//	private boolean hasMoved;
 	
 	// Constructor
 	public Piece (Color color, Type type) {
 		this.color = color;
 		this.type = type;
-		this.hasMoved = false;
+//		this.hasMoved = false;
 	}
 	
 	// getters
@@ -61,6 +61,14 @@ public abstract class Piece {
 	}
     	return null;
     }
+    
+    public Move getCapture (Point start, Point end,Game g) {
+	Piece p = g.getPieceAt(end);
+	if (p == null || p.color == this.color) return null; // can't capture
+        if (this.getAttackedSquares(start, g.getBoard()).contains(end))
+	    return getMoveWithCapture(start, end, g);
+	return null;
+    }
 
     public List<Point> getAttackedSquares (Point p, Game g) {
 	//List<Point> squares = new ArrayList<Point>();
@@ -70,12 +78,12 @@ public abstract class Piece {
 	//return squares;
 	return getAttackedSquares(p, g.getBoard());
     }
-
-
+/*
     public boolean hasMoved() {return hasMoved;}
     public void setHasMoved() {this.hasMoved = true;}
     public void resetHasMoved() {this.hasMoved = false;} 
-    
+*/
+  
     // Helper methods
    
     public static Color getEnemy (Color c) {return c == Color.WHITE ? Color.BLACK : Color.WHITE;}
@@ -133,9 +141,9 @@ public abstract class Piece {
 	List<Move> sideEffects = null;
 	if (isEnemy(endPiece)) {
 	    sideEffects = new ArrayList<Move>();
-	    sideEffects.add(new Move(endPiece, end, null,!endPiece.hasMoved(), null));
+	    sideEffects.add(new Move(endPiece, end, null, !g.hasMoved(endPiece), null));
 	}
-	return new Move(this, start, end, !this.hasMoved(), sideEffects);
+	return new Move(this, start, end, !g.hasMoved(this), sideEffects);
     }
     
     // Abstract Methods

@@ -30,8 +30,8 @@ public class Pawn extends Piece {
 	    if (enemStart.equals(lastMove.getStartLoc()) && enemEnd.equals(lastMove.getEndLoc())) {
 	    	// We are able to en-passant
 	    	List<Move> sideEffects = new ArrayList<Move>();
-		sideEffects.add(new Move(lastMove.getPiece(), lastMove.getEndLoc(), null,lastMove.getPiece().hasMoved(), null));
-		validMoves.add(new Move(this, p, new Point (p.x-1, p.y+direction),!this.hasMoved(), sideEffects));
+		sideEffects.add(new Move(lastMove.getPiece(), lastMove.getEndLoc(), null,g.hasMoved(lastMove.getPiece()), null));
+		validMoves.add(new Move(this, p, new Point (p.x-1, p.y+direction),!g.hasMoved(this), sideEffects));
 	    }
 
 	    enemEnd = new Point (p.x+1, p.y); // to our right
@@ -39,8 +39,8 @@ public class Pawn extends Piece {
 	    if (enemStart.equals(lastMove.getStartLoc()) && enemEnd.equals(lastMove.getEndLoc())) {
 	    	// We are able to en-passant
 		List<Move> sideEffects = new ArrayList<Move>();
-		sideEffects.add(new Move(lastMove.getPiece(), lastMove.getEndLoc(), null,lastMove.getPiece().hasMoved(), null));
-		validMoves.add(new Move(this, p, new Point (p.x+1, p.y+direction),!this.hasMoved(), sideEffects));
+		sideEffects.add(new Move(lastMove.getPiece(), lastMove.getEndLoc(), null,g.hasMoved(lastMove.getPiece()), null));
+		validMoves.add(new Move(this, p, new Point (p.x+1, p.y+direction),!g.hasMoved(this), sideEffects));
 	    }
 	}
 	
@@ -71,6 +71,12 @@ public class Pawn extends Piece {
 	loc = new Point (p.x - 1, p.y + direction);
 	if (Game.validPoint(loc)) squares.add(loc);
 	return squares;
+    }
+
+    @Override
+    public Move getCapture (Point start, Point end,Game g) {
+	Move m = super.getCapture(start,end,g);
+	return m;
     }
     
     public List<Point> getAttackLine(Point start, Point end, Piece[][] board) {return null;}
