@@ -199,8 +199,8 @@ public class Game extends Observable {
 	Piece[][] b = this.getBoard();
 	if (isChecked(player, b)) {
 	    if (kingCanMove(p,oppCol,b) || 
-		pieceCanCaptureChecker(p,oppCol,b) ||
-		pieceCanBlockChecker(p,oppCol,b)) {
+		pieceCanCaptureChecker(p,oppCol) ||
+		pieceCanBlockChecker(p,oppCol)) {
 		return false;
 	    }
 	    return true;
@@ -224,7 +224,9 @@ public class Game extends Observable {
 	return false;
     }
 
-    private boolean pieceCanCaptureChecker(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
+    private boolean pieceCanCaptureChecker(Point kingPosn, Piece.Color oppCol) {
+	// Since need to check for en-passant, require game structure, not just Piece[][]
+	Piece[][] board = getBoard();
 	List<Point> piecesAttackingKing = getPiecesAttackingKing(kingPosn, oppCol, board);
 	// Know king is in check, so at least 1 piece checking king
 	// Could throw error as an error check if 0 pieces
@@ -259,7 +261,8 @@ public class Game extends Observable {
 	}
 	return false;
     }
-    private boolean pieceCanBlockChecker(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
+    private boolean pieceCanBlockChecker(Point kingPosn, Piece.Color oppCol) {
+	Piece[][] board = getBoard();
 	List<Point> piecesAttackingKing = getPiecesAttackingKing(kingPosn, oppCol, board);
 	if (piecesAttackingKing.size() >= 2) return false;
 	// need to check if a piece can block the attacker
@@ -272,10 +275,36 @@ public class Game extends Observable {
 	    return false; // attacker attacks kingPosn directly 
 	} else {
 	    // There are squares to block!
-	    // TODO: Check that a piece can move to one of these squares
-	    // TODO: If it can, check that we aren't in check afterwards.
+	    for (int x = 0; x < BOARD_SIZE; x++) {
+		for (int y = 0; y < BOARD_SIZE; y++) {
+		    Piece p = board[x][y];
+		    if (p == null || p.getColor() == oppCol) continue;
+		    // The piece is one of ours.
+		    // Note: we cannot block pawns : don't need to check if en-passant
+		    // Will do anyway for simplicity - can optimize away and allow passing
+		    //				       passing of Piece[][] instead
+		    List<Move> pMoves = p.getValidMoves(new Point(x,y), this);
+		    if (pMoves == null) continue;
+		    for (Move m : pMoves) {
+			if (attackLine.contains(m.getEndLoc())) {
+			    // We have found one of our pieces able to move into the attack line
+			    // Check to see that we aren't in check if we move here.
+    		    	    if (executeMove (m, board)) {
+			    	// Check to see that we wouldn't be in check
+				if (!isChecked(p.getColor(), board)) {
+			    	    // This is a valid block
+			    	    return true;
+				} else {
+                            	    // We are in check after this block -- not valid
+			    	    revertMove(m, board);
+                        	}
+		    	    } else continue; // we couldn't execute the move
+			} else continue; // can't move to attack line
+		    } // end move in pmove
+		} // end yloop
+	    } // end xloop
 	}
-	return true;
+	return false; // we couldn't find an attacking move - return false
     }
 
     private List<Point> getPiecesAttackingKing(Point kingPosn, Piece.Color oppCol, Piece[][] board) {
