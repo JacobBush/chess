@@ -63,11 +63,13 @@ public abstract class Piece {
     }
     
     public Move getCapture (Point start, Point end,Game g) {
-	Piece p = g.getPieceAt(end);
-	if (p == null || p.color == this.color) return null; // can't capture
-        if (this.getAttackedSquares(start, g.getBoard()).contains(end))
-	    return getMoveWithCapture(start, end, g);
-	return null;
+	List<Point> capturablePieces = getCapturablePieces(start, g);
+	if (capturablePieces != null && capturablePieces.contains(end)) {
+	    // Piece is capturable
+	    return getMoveWithCapture(start,end,g);
+	} else {
+	    return null;
+	}
     }
 
     public List<Point> getAttackedSquares (Point p, Game g) {
@@ -152,5 +154,5 @@ public abstract class Piece {
     // return list of point to attack end from start    
     public abstract List<Point> getAttackLine (Point start, Point end, Piece[][] board);
     // Similar to get attacked squares, but will return location of all pieces that could be captured
-    public abstract List<Point> getCapturablePieces (Point p, Piece[][] board);
+    public abstract List<Point> getCapturablePieces (Point p, Game g);
 }

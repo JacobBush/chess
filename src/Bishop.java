@@ -61,8 +61,14 @@ public class Bishop extends Piece {
 	return squares;
     }    
     
-    public List<Point> getAttackLine(Point start, Point end, Piece[][] board) {return null;}
-    public List<Point> getCapturablePieces (Point p, Piece[][] board) {return null;}
+    public List<Point> getAttackLine(Point start, Point end, Piece[][] board) {
+	List<Point> attackLine = new ArrayList<Point>();
+	return attackLine;
+    }
+    public List<Point> getCapturablePieces (Point p, Game g) {
+	List<Point> capturablePieces = new ArrayList<Point>();
+	return capturablePieces;
+    }
 
     // usability
     @Override

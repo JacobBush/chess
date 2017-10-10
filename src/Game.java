@@ -242,7 +242,7 @@ public class Game extends Observable {
 		if (piece == null || piece.getColor() == oppCol) continue;
 		// Piece is one of ours
 		Point piecePosn = new Point(x,y);
-		List<Point> capturablePieces = piece.getCapturablePieces(piecePosn, board);
+		List<Point> capturablePieces = piece.getCapturablePieces(piecePosn, this);
 	    	if (capturablePieces != null && capturablePieces.contains(attackerPosn)) {
 		    // We can capture the attacker!
 		    Move m = piece.getCapture(piecePosn, attackerPosn, this); // get the move to capture this piece
