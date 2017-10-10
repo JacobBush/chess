@@ -98,6 +98,7 @@ public class GameViewBoard extends JPanel implements Observer, MouseListener, Mo
 		Point endPoint = this.getBoardPosition(e.getLocationOnScreen());
 		game.movePiece (startPoint, endPoint);
 		setMouseCursor(true);
+		checkAndDisplayCheckMateDialog();
 	}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
@@ -152,6 +153,29 @@ public class GameViewBoard extends JPanel implements Observer, MouseListener, Mo
 			System.out.println(e + " : sound not supported in call to GameView.playSound().");
 			System.out.println("Muting sound.");
 			this.mute();
+		}
+	}
+
+	private void checkAndDisplayCheckMateDialog() {
+		if (game.getVictor() != null) {
+			String victor = game.getVictor() == Piece.Color.WHITE ? "White" : "Black";
+			Object [] options = {"Continue","Restart Game"};
+			int n = JOptionPane.showOptionDialog(
+				vc,
+				victor + " player wins the game!",
+				victor + " Player Wins",
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE,
+				null,
+				options,
+				options[0]
+			);
+			if (n == 0) {
+				// Do nothing
+			} else if (n == 1) {
+				// restart game
+				game.resetGame();
+			}
 		}
 	}
 

@@ -399,7 +399,10 @@ public class Game extends Observable {
     public Piece.Color getTurn () {
     	return turn;
     }
-    
+   
+    public Piece.Color getVictor () {
+	return victor;
+    } 
     // private Methods    
     private void initializeBoard() {
     	this.clearBoard ();
