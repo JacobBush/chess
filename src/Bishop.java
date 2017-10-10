@@ -62,12 +62,25 @@ public class Bishop extends Piece {
     }    
     
     public List<Point> getAttackLine(Point start, Point end, Piece[][] board) {
-	List<Point> attackLine = new ArrayList<Point>();
-	return attackLine;
-    }
-    public List<Point> getCapturablePieces (Point p, Game g) {
-	List<Point> capturablePieces = new ArrayList<Point>();
-	return capturablePieces;
+	List<Point> attackedSquares = getAttackedSquares(start,board);
+	if (attackedSquares != null && attackedSquares.contains(end)) {
+		// The attack line exists
+		List<Point> attackLine = new ArrayList<Point>();
+		int xdir = end.x - start.x;
+		int ydir = end.y - start.y;
+		int maxDist = xdir > ydir ? xdir : ydir; // >= 1 since line exists
+		if (maxDist == 0) return null; // could throw instead
+		// Unit vectors
+		xdir = xdir == 0 ? 0 : xdir > 0 ? 1 : -1;
+		ydir = ydir == 0 ? 0 : ydir > 0 ? 1 : -1;
+		
+		for (int i = 1; i <= maxDist; i ++) {
+			attackLine.add(new Point(start.x + i*xdir, start.y + i*ydir));
+		}
+		return attackLine;
+	} else {
+		return null;
+	}
     }
 
     // usability

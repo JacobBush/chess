@@ -79,13 +79,13 @@ public class King extends Piece {
 
     public List<Point> getAttackLine(Point start, Point end, Piece[][] board) {
 	List<Point> attackLine = new ArrayList<Point>();
+	List<Point> attackedSquares = getAttackedSquares(start, board);
+	if (attackedSquares != null && attackedSquares.contains(end)) {
+	    attackLine.add(end); // king can only move 1 space
+	}
 	return attackLine;
     }
-    public List<Point> getCapturablePieces (Point p, Game g) {
-	List<Point> capturablePieces = new ArrayList<Point>();
-	return capturablePieces;
-    }
- 
+
     // usability
     @Override
     public String toString () {

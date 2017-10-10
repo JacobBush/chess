@@ -80,6 +80,17 @@ public abstract class Piece {
 	//return squares;
 	return getAttackedSquares(p, g.getBoard());
     }
+   
+    // Pawn will need to override 
+    public List<Point> getCapturablePieces (Point p, Game g) {
+	List<Point> capturablePieces = new ArrayList<Point>();
+	for (Point point : getAttackedSquares(p, g.getBoard())) {
+		if (isEnemy(g.getPieceAt(point))) {
+			capturablePieces.add(point);
+		}
+	}
+	return capturablePieces;
+    }
 /*
     public boolean hasMoved() {return hasMoved;}
     public void setHasMoved() {this.hasMoved = true;}
@@ -153,6 +164,4 @@ public abstract class Piece {
     public abstract List<Point> getAttackedSquares (Point p, Piece[][] board); // returns all attacked squares
     // return list of point to attack end from start    
     public abstract List<Point> getAttackLine (Point start, Point end, Piece[][] board);
-    // Similar to get attacked squares, but will return location of all pieces that could be captured
-    public abstract List<Point> getCapturablePieces (Point p, Game g);
 }

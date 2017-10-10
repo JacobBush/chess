@@ -87,8 +87,33 @@ public class Pawn extends Piece {
 	}
 	return attackLine;
     }
+
+    @Override
     public List<Point> getCapturablePieces (Point p, Game g) {
-	List<Point> capturablePieces = new ArrayList<Point>();
+	List<Point> capturablePieces = super.getCapturablePieces(p,g);
+        int direction = this.getColor() == Piece.Color.BLACK ? -1 : 1;
+	
+	// Need to check for en-passant
+	// TODO: COPY-PASTED : should moved into method	
+	// Here is the check for en-passant
+	Move lastMove = g.getLastMove();
+	if (lastMove != null && lastMove.getPiece() instanceof Pawn) {
+	    // Last move must be enemy. Now also must be pawn.
+	    // could throw error if it is not an enemy.
+	    Point enemEnd = new Point (p.x-1, p.y); // to our left
+	    Point enemStart = new Point (p.x-1, p.y + 2*direction); // Pawn moved 2 in opposite of our direction
+	    if (enemStart.equals(lastMove.getStartLoc()) && enemEnd.equals(lastMove.getEndLoc())) {
+	    	// We are able to en-passant
+	    	capturablePieces.add(enemEnd);
+	    }
+
+	    enemEnd = new Point (p.x+1, p.y); // to our right
+	    enemStart = new Point (p.x+1, p.y + 2*direction); // Pawn moved 2 in opposite of our direction
+	    if (enemStart.equals(lastMove.getStartLoc()) && enemEnd.equals(lastMove.getEndLoc())) {
+	    	// We are able to en-passant
+	    	capturablePieces.add(enemEnd);
+	    }
+	}
 	return capturablePieces;
     }
     
