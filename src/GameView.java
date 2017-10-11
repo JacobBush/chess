@@ -78,7 +78,7 @@ public class GameView extends JLayeredPane  {
 	}
 	
 	private class GameViewFooter extends JPanel {
-		private final String loadSpeaker = "\uD83D\uDD0A";
+		private final String loudSpeaker = "\uD83D\uDD0A";
 		private final String speaker = "\uD83D\uDD08";
 		private final String muteSpeaker = "\uD83D\uDD07";
 		
@@ -98,7 +98,7 @@ public class GameView extends JLayeredPane  {
             gbc.fill = GridBagConstraints.VERTICAL;
 			gbc.insets = new Insets(0, 0, 0, 5);
 			
-			JButton muteButton = new JButton(loadSpeaker);
+			JButton muteButton = new JButton(loudSpeaker);
 			muteButton.setToolTipText("Click to mute sounds");
 			
 			muteButton.addActionListener(new ActionListener() {
@@ -107,10 +107,10 @@ public class GameView extends JLayeredPane  {
 					  board.toggleMute();
 					  if (board.isMuted()) {
 						  muteButton.setToolTipText("Click to enable sounds");
-						  muteButton.setText(muteSpeaker);
+						  muteButton.setText(speaker);
 					  } else {
 						  muteButton.setToolTipText("Click to mute sounds");
-						  muteButton.setText(loadSpeaker);
+						  muteButton.setText(loudSpeaker);
 					  }
 				  }
 			});

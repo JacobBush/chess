@@ -1,4 +1,4 @@
-<project name="chess" default="run" basedir=".">
+<project name="chess" default="distribute" basedir=".">
   <description>
     Chess application implemented using Java.
   </description>
@@ -6,25 +6,40 @@
   <property name="run_class" value="Main"/>
   <property name="src" location="./src"/>
   <property name="dest" location="./out"/>
+  <property name="images" location="./img"/>
+  <property name="audio" location="./audio"/>
+  <property name="compile.dest" location="${dest}/classes"/>
+  <property name="build.dest" location="${dest}/jar"/>
 
   <target name="compile"
 		description="compile the source">
     <!-- Compile the java code from ${src} into ${dest} -->
-    <mkdir dir="${dest}" />
-    <javac srcdir="${src}" destdir="${dest}" includeAntRuntime="false"/>
+    <mkdir dir="${compile.dest}" />
+    <javac srcdir="${src}" destdir="${compile.dest}" includeAntRuntime="false"/>
   </target>
 
-  <target name="run" depends="compile"
-        description="runs the program">
-    <!-- Create the distribution directory -->
-    <java classname="${run_class}" classpath="${dest}" fork="true"/>
+	<!--target name="run" depends="compile"
+	        description="runs the program"-->
+	    <!-- Create the distribution directory -->
+	    <!--java classname="${run_class}" classpath="${compile.dest}" fork="true"/>
+	  </target-->
+	
+  <target name="distribute" depends = "compile" >
+        <mkdir dir="${build.dest}"/>
+        <jar destfile="${build.dest}/Chess.jar" basedir="${compile.dest}" >
+            <manifest>
+                <attribute name="Main-Class" value="${run_class}"/>
+            </manifest>
+        	<fileset dir="${images}" includes="*.png"/>
+        	<fileset dir="${audio}" includes="*.wav"/>
+        </jar>
   </target>
 
   <target name="clean"
 		description="clean up">
     <!-- Delete the all files and subdirectories from ${dest} -->
     <delete includeemptydirs="true">
-		<fileset dir="${dest}" includes="**/*"/>
+		<fileset dir="${compile.dest}" includes="**/*"/>
 	</delete>
   </target>
 </project>

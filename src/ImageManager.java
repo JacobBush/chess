@@ -37,18 +37,18 @@ public class ImageManager {
 		BufferedImage wk = null;
 		
 		try {
-			bp = ImageIO.read(new File("img/black_pawn.png"));
-			br = ImageIO.read(new File("img/black_rook.png"));
-			bn = ImageIO.read(new File("img/black_knight.png"));
-			bb = ImageIO.read(new File("img/black_bishop.png"));
-			bq = ImageIO.read(new File("img/black_queen.png"));
-			bk = ImageIO.read(new File("img/black_king.png"));
-			wp = ImageIO.read(new File("img/white_pawn.png"));
-			wr = ImageIO.read(new File("img/white_rook.png"));
-			wn = ImageIO.read(new File("img/white_knight.png"));
-			wb = ImageIO.read(new File("img/white_bishop.png"));
-			wq = ImageIO.read(new File("img/white_queen.png"));
-			wk = ImageIO.read(new File("img/white_king.png"));
+			bp = ImageIO.read(ImageManager.class.getResource("black_pawn.png"));
+			br = ImageIO.read(ImageManager.class.getResource("black_rook.png"));
+			bn = ImageIO.read(ImageManager.class.getResource("black_knight.png"));
+			bb = ImageIO.read(ImageManager.class.getResource("black_bishop.png"));
+			bq = ImageIO.read(ImageManager.class.getResource("black_queen.png"));
+			bk = ImageIO.read(ImageManager.class.getResource("black_king.png"));
+			wp = ImageIO.read(ImageManager.class.getResource("white_pawn.png"));
+			wr = ImageIO.read(ImageManager.class.getResource("white_rook.png"));
+			wn = ImageIO.read(ImageManager.class.getResource("white_knight.png"));
+			wb = ImageIO.read(ImageManager.class.getResource("white_bishop.png"));
+			wq = ImageIO.read(ImageManager.class.getResource("white_queen.png"));
+			wk = ImageIO.read(ImageManager.class.getResource("white_king.png"));
 		} catch (IOException e) {
 		    System.out.println(e);
 		}

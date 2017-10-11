@@ -6,6 +6,7 @@ import java.util.*;
 // For sounds
 import java.io.File;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.Clip;
 
 public class GameViewBoard extends JPanel implements Observer, MouseListener, MouseMotionListener {
@@ -17,9 +18,6 @@ public class GameViewBoard extends JPanel implements Observer, MouseListener, Mo
 	private Point startPoint;
 	// Sound
 	private boolean muteSound;
-	// Sound for moving pieces
-	static File knockSound = new File ("audio/knock.wav");
-
 
 	public GameViewBoard(ViewController vc, Game game) {
 		super();
@@ -146,8 +144,9 @@ public class GameViewBoard extends JPanel implements Observer, MouseListener, Mo
 	private void playSound() {
 		if (muteSound) return;
 		try {
+			AudioInputStream knockSound = AudioSystem.getAudioInputStream(this.getClass().getClassLoader().getResource("knock.wav"));
 			Clip clip = AudioSystem.getClip();
-			clip.open(AudioSystem.getAudioInputStream(knockSound));
+			clip.open(knockSound);
 			clip.start();
 		} catch (Exception e) {
 			System.out.println(e + " : sound not supported in call to GameView.playSound().");
