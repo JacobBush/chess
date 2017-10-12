@@ -38,8 +38,8 @@ public class Game extends Observable {
     
     public void movePiece (Point startingLocation, Point endingLocation) {
     	// TODO:
-    	//    -mate
     	//    -Pawn Promotion
+    	//	  -Stale Mate
 	
 	if (victor != null) return; // Don't move if player has won
 	
